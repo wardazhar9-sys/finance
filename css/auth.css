@@ -237,3 +237,17 @@
 }
 .ghost-btn:hover { border-color: var(--gold); color: var(--gold); }
 .ghost-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+
+/* ===== Auth / onboarding responsive ===== */
+@media (max-width: 560px) {
+  .auth-wrap { padding: 28px 16px; align-items: flex-start; }
+  .auth-card { padding: 32px 22px; border-radius: 20px; }
+  .auth-card h1 { font-size: 24px; }
+  .wizard { padding: 28px 20px; border-radius: 20px; }
+  .wizard-nav { flex-direction: column-reverse; }
+  .wizard-nav button { width: 100%; }
+}
+
+@media (max-width: 360px) {
+  .chip-grid { grid-template-columns: 1fr; }
+}

@@ -46,6 +46,7 @@ function emptyData() {
   return {
     profile: {
       onboarded: false,
+      currency: '',
       income: 0,
       categories: [],
       bills: [],
@@ -119,6 +120,8 @@ function uid() {
 }
 
 function money(n) {
+  const code = typeof getUserCurrency === 'function' ? getUserCurrency() : 'USD';
+  if (typeof formatMoney === 'function') return formatMoney(n, code);
   return '$' + Number(n || 0).toLocaleString('en-US', { maximumFractionDigits: 0 });
 }
 
@@ -209,6 +212,10 @@ function normalizeGoal(g) {
 function migrateData(data) {
   if (!data || typeof data !== 'object') return emptyData();
   if (!data.profile || typeof data.profile !== 'object') data.profile = emptyData().profile;
+  if (typeof data.profile.currency !== 'string') data.profile.currency = '';
+  if (!data.profile.currency && typeof detectDefaultCurrency === 'function') {
+    data.profile.currency = detectDefaultCurrency();
+  }
   if (!Array.isArray(data.transactions)) data.transactions = [];
   if (!data.budgets || typeof data.budgets !== 'object') data.budgets = {};
   if (!Array.isArray(data.subscriptions)) data.subscriptions = [];

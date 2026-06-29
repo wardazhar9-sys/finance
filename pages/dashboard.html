@@ -7,8 +7,10 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
-  <link rel="stylesheet" href="../css/styles.css"/>
-  <link rel="stylesheet" href="../css/dashboard.css?v=14"/>
+  <link rel="stylesheet" href="../css/styles.css?v=2"/>
+  <link rel="stylesheet" href="../css/dashboard.css?v=16"/>
+  <link rel="stylesheet" href="../css/currency.css?v=2"/>
+  <link rel="stylesheet" href="../css/search.css?v=1"/>
 </head>
 <body>
   <div class="app">
@@ -21,6 +23,8 @@
           <h1>Welcome back, <span id="userName">there</span></h1>
           <p id="styleTip">Here's how your money looks today.</p>
         </div>
+        <!-- Reusable live-search widget (mounted by dashboard.js / FinSearch) -->
+        <div class="dash-search" id="dashSearch"></div>
         <div class="topbar-actions">
           <div class="notif-wrap" id="notifWrap">
             <button type="button" class="notif-btn" id="notifBtn" aria-label="Notifications" aria-expanded="false" aria-controls="notifPanel">
@@ -140,12 +144,16 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-  <script src="../js/storage.js?v=13"></script>
+  <script src="../js/currency-data.js?v=1"></script>
+  <script src="../js/storage.js?v=14"></script>
+  <script src="../js/currency.js?v=1"></script>
+  <script src="../js/currency-select.js?v=1"></script>
   <script src="../js/ui.js?v=13"></script>
   <script src="../js/loader.js?v=7"></script>
   <script src="../js/auth.js?v=7"></script>
-  <script src="../js/app-nav.js?v=9"></script>
+  <script src="../js/app-nav.js?v=11"></script>
   <script src="../js/notifications.js?v=13"></script>
-  <script src="../js/dashboard.js?v=13"></script>
+  <script src="../js/search.js?v=1"></script>
+  <script src="../js/dashboard.js?v=15"></script>
 </body>
 </html>

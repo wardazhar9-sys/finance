@@ -214,11 +214,29 @@
 }
 
 @media (max-width: 650px) {
-  .nav-links, .buttons { display: none; }
   .hero-content h1 { font-size: 36px; }
   .dashboard-mockup { grid-template-columns: 1fr; grid-template-rows: auto; gap: 16px; padding: 16px; }
   .w-left-top, .w-right-top, .w-left-bottom, .w-right-bottom { grid-column: initial; grid-row: initial; }
   .stat-card { min-width: 110px; padding: 15px; }
+}
+
+/* ===== Marketing navbar → hamburger drawer ===== */
+@media (max-width: 1024px) {
+  .navbar { padding: 0 40px; }
+  .right-section { gap: 28px; }
+  .nav-links { gap: 24px; }
+}
+@media (max-width: 860px) {
+  .navbar { padding: 0 22px; }
+  .nav-links,
+  .buttons { display: none; }
+  .nav-toggle { display: flex; }
+}
+@media (max-width: 480px) {
+  .navbar { height: 76px; padding: 0 16px; }
+  .hero { min-height: calc(100vh - 76px); }
+  .logo-text { font-size: 22px; }
+  .logo-icon { width: 40px; height: 40px; }
 }
 
 /* ================= SUB-PAGE HERO (Features / Pricing) ================= */

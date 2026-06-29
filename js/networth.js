@@ -135,7 +135,7 @@ function renderChart(data) {
       plugins: { legend: { display: false } },
       scales: {
         x: { grid: { color: GRID }, ticks: { color: TICK } },
-        y: { beginAtZero: true, grid: { color: GRID }, ticks: { color: TICK, callback: (v) => '$' + Number(v).toLocaleString('en-US') } },
+        y: { beginAtZero: true, grid: { color: GRID }, ticks: { color: TICK, callback: (v) => chartMoneyTick(v) } },
       },
     },
   });
@@ -162,7 +162,7 @@ function renderTrend(data) {
       plugins: { legend: { labels: { color: TICK, usePointStyle: true, boxWidth: 8 } } },
       scales: {
         x: { grid: { color: GRID }, ticks: { color: TICK } },
-        y: { grid: { color: GRID }, ticks: { color: TICK, callback: (v) => '$' + Number(v).toLocaleString('en-US') } },
+        y: { grid: { color: GRID }, ticks: { color: TICK, callback: (v) => chartMoneyTick(v) } },
       },
     },
   });
@@ -215,3 +215,4 @@ bindFormInputClear([
   { field: 'liabilityValue', error: 'liabilityValueError' },
 ], 'liabilityFormError');
 render();
+bindCurrencyRefresh(render);

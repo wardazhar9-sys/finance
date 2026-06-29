@@ -2,8 +2,9 @@
 
 requireAuth();
 
-const TOTAL_STEPS = 5;
+const TOTAL_STEPS = 6;
 let step = 1;
+let currencyPicker = null;
 
 const CAT_META = {
   Food: 'fa-utensils', Rent: 'fa-house', Transport: 'fa-car', Shopping: 'fa-bag-shopping',
@@ -11,6 +12,7 @@ const CAT_META = {
 };
 
 const answers = {
+  currency: detectDefaultCurrency(),
   income: 0,
   categories: [],
   catAmounts: {},
@@ -43,6 +45,7 @@ function setStepFieldError(errorId, message, inputId, gridId) {
 function clearStepErrors() {
   showWizardError('');
   [
+    ['currencyError', null, 'currencySelectMount'],
     ['incomeError', 'income'],
     ['categoryError', null, 'categoryChips'],
     ['goalTypeError', null, 'goalChips'],
@@ -73,10 +76,41 @@ function focusFirstStepInvalid() {
   if (first) first.focus();
 }
 
+function initCurrencyStep() {
+  const mount = document.getElementById('currencySelectMount');
+  const hint = document.getElementById('currencyDetectedHint');
+  if (!mount) return;
+
+  const detected = detectDefaultCurrency();
+  if (hint) {
+    hint.innerHTML = `Detected from your region: <strong>${currencyLabel(detected)}</strong>`;
+  }
+
+  if (currencyPicker) currencyPicker.destroy();
+  currencyPicker = createCurrencySelect(mount, {
+    value: answers.currency || detected,
+    onChange(code) {
+      answers.currency = code;
+      setStepFieldError('currencyError', '', null, 'currencySelectMount');
+      showWizardError('');
+    },
+  });
+}
+
 function validateStep(n) {
   clearStepErrors();
 
   if (n === 1) {
+    const code = currencyPicker ? currencyPicker.getValue() : answers.currency;
+    if (!code || !CURRENCY_MAP[code]) {
+      setStepFieldError('currencyError', 'Please select a currency.', null, 'currencySelectMount');
+      showWizardError('Choose your display currency before continuing.');
+      return false;
+    }
+    return true;
+  }
+
+  if (n === 2) {
     const input = document.getElementById('income');
     const raw = input.value.trim();
     if (!raw) {
@@ -98,7 +132,7 @@ function validateStep(n) {
     return true;
   }
 
-  if (n === 2) {
+  if (n === 3) {
     const selected = document.querySelectorAll('#categoryChips .chip.selected');
     if (!selected.length) {
       setStepFieldError('categoryError', 'Select at least one spending category.', null, 'categoryChips');
@@ -108,7 +142,7 @@ function validateStep(n) {
     return true;
   }
 
-  if (n === 3) {
+  if (n === 4) {
     const inputs = document.querySelectorAll('#catAmounts input');
     if (!inputs.length) {
       showWizardError('Go back and select at least one category.');
@@ -140,7 +174,7 @@ function validateStep(n) {
     return true;
   }
 
-  if (n === 4) {
+  if (n === 5) {
     const sel = document.querySelector('#goalChips .chip.selected');
     if (!sel) {
       setStepFieldError('goalTypeError', 'Select your main financial goal.', null, 'goalChips');
@@ -173,7 +207,7 @@ function validateStep(n) {
     return true;
   }
 
-  if (n === 5) {
+  if (n === 6) {
     const sel = document.querySelector('#styleChips .chip.selected');
     if (!sel) {
       setStepFieldError('styleError', 'Select the option that best describes you.', null, 'styleChips');
@@ -237,13 +271,15 @@ function buildCategoryAmounts() {
   }
   empty.style.display = 'none';
 
+  const sym = getCurrency(answers.currency || getUserCurrency()).symbol;
+
   answers.categories.forEach((cat) => {
     const field = document.createElement('div');
     field.className = 'field';
     const prev = answers.catAmounts[cat] || '';
     field.innerHTML = `
       <label for="amt_${cat}"><i class="fa-solid ${CAT_META[cat] || 'fa-circle-dollar-to-slot'}" style="color:var(--gold);margin-right:8px;"></i>${cat}</label>
-      <input type="number" min="0.01" step="0.01" id="amt_${cat}" data-cat="${cat}" placeholder="Monthly amount" value="${prev}" required/>
+      <input type="number" min="0.01" step="0.01" id="amt_${cat}" data-cat="${cat}" placeholder="Monthly amount (${sym})" value="${prev}" required/>
       <p class="field-error"></p>`;
     const input = field.querySelector('input');
     input.addEventListener('input', () => {
@@ -264,27 +300,29 @@ function showStep(n) {
   document.getElementById('backBtn').disabled = n === 1;
   document.getElementById('nextBtn').textContent = n === TOTAL_STEPS ? 'Finish' : 'Continue';
   clearStepErrors();
-  if (n === 3) buildCategoryAmounts();
+  if (n === 1) initCurrencyStep();
+  if (n === 4) buildCategoryAmounts();
 }
 
 function collectStep(n) {
-  if (n === 1) answers.income = Number(document.getElementById('income').value) || 0;
-  if (n === 2) {
+  if (n === 1) answers.currency = currencyPicker ? currencyPicker.getValue() : answers.currency;
+  if (n === 2) answers.income = Number(document.getElementById('income').value) || 0;
+  if (n === 3) {
     answers.categories = [...document.querySelectorAll('#categoryChips .chip.selected')].map((c) => c.dataset.value);
   }
-  if (n === 3) {
+  if (n === 4) {
     answers.catAmounts = {};
     document.querySelectorAll('#catAmounts input').forEach((inp) => {
       answers.catAmounts[inp.dataset.cat] = Number(inp.value) || 0;
     });
   }
-  if (n === 4) {
+  if (n === 5) {
     const sel = document.querySelector('#goalChips .chip.selected');
     answers.goalType = sel ? sel.dataset.value : '';
     answers.goalTarget = Number(document.getElementById('goalTarget').value) || 0;
     answers.goalSaved = Number(document.getElementById('goalSaved').value) || 0;
   }
-  if (n === 5) {
+  if (n === 6) {
     const sel = document.querySelector('#styleChips .chip.selected');
     answers.moneyStyle = sel ? sel.dataset.value : '';
   }
@@ -323,6 +361,7 @@ function finish() {
 
   data.profile = {
     onboarded: true,
+    currency: answers.currency || detectDefaultCurrency(),
     income: answers.income,
     categories: answers.categories,
     moneyStyle: answers.moneyStyle,

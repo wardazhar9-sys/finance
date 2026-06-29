@@ -164,3 +164,4 @@ bindFormInputClear([
   { field: 'subNote', error: 'subNoteError' },
 ], 'subFormError');
 render();
+bindCurrencyRefresh(render);

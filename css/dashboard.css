@@ -47,6 +47,23 @@
 }
 .side-logout:hover { background: rgba(255,82,82,0.1); color: var(--red); }
 
+/* mobile chrome (hidden on desktop) */
+.app-mobile-bar { display: none; }
+.app-nav-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(4, 10, 20, 0.6);
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+  z-index: 1500;
+}
+.app-nav-overlay.is-open { opacity: 1; pointer-events: auto; }
+body.app-nav-open { overflow: hidden; }
+
 /* main */
 .main {
   padding: 32px 40px 60px;
@@ -60,6 +77,10 @@
 .topbar .greeting span { color: var(--gold); }
 .topbar .greeting p { color: var(--muted); font-size: 14px; margin-top: 4px; }
 .topbar-actions { display: flex; align-items: center; gap: 12px; flex-shrink: 0; overflow: visible; }
+
+/* Dashboard search: sits inline to the right of the title, before the actions */
+.dash-search { margin-left: auto; min-width: 0; }
+@media (max-width: 900px) { .dash-search { width: 100%; margin-left: 0; order: 3; } }
 
 /* notifications bell */
 .notif-wrap { position: relative; flex-shrink: 0; z-index: 210; }
@@ -695,11 +716,70 @@
   .goals-wrap { grid-template-columns: 1fr; }
 }
 @media (max-width: 820px) {
-  .app { grid-template-columns: 1fr; }
-  .sidebar { position: static; height: auto; flex-direction: row; align-items: center; gap: 16px; overflow-x: auto; }
-  .sidebar .logo { margin-bottom: 0; }
-  .side-nav { flex-direction: row; }
-  .side-logout { width: auto; }
+  .app { display: block; }
+
+  /* Sidebar becomes an off-canvas drawer */
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    height: 100dvh;
+    width: min(280px, 86vw);
+    padding: 24px 20px calc(24px + env(safe-area-inset-bottom));
+    z-index: 1600;
+    transform: translateX(-100%);
+    transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+    box-shadow: 24px 0 60px rgba(0, 0, 0, 0.5);
+    border-right: 1px solid rgba(212, 175, 55, 0.18);
+  }
+  .sidebar.is-open { transform: translateX(0); }
+  .sidebar .logo { margin-bottom: 32px; }
+  .side-nav { flex-direction: column; }
+  .side-logout { width: 100%; }
+
+  /* keep currency selector reachable inside the drawer */
+  .side-currency { display: block; }
+
+  .app-nav-overlay { display: block; }
+
+  /* Mobile top bar */
+  .app-mobile-bar {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    position: sticky;
+    top: 12px;
+    z-index: 300;
+    margin-bottom: 8px;
+    padding: 10px 14px;
+    border-radius: 16px;
+    background: rgba(10, 20, 36, 0.94);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(212, 175, 55, 0.14);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+  }
+  .app-mobile-bar .logo { gap: 10px; cursor: pointer; }
+  .app-mobile-bar .logo-text { font-size: 21px; }
+  .app-mobile-bar .logo-icon { width: 38px; height: 38px; }
+  .app-nav-toggle {
+    width: 44px;
+    height: 44px;
+    flex-shrink: 0;
+    border-radius: 12px;
+    border: 1px solid rgba(212, 175, 55, 0.3);
+    background: rgba(212, 175, 55, 0.08);
+    color: var(--gold);
+    font-size: 19px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .app-nav-toggle:hover { background: rgba(212, 175, 55, 0.16); }
+
   .main { padding: 24px 20px 50px; }
 }
 @media (max-width: 640px) {
@@ -863,4 +943,29 @@
     width: 100%;
     text-align: center;
   }
+}
+
+/* ===== Touch-target & overflow polish (small screens) ===== */
+@media (max-width: 820px) {
+  .topbar h1 { overflow-wrap: anywhere; }
+
+  /* Comfortable tap targets */
+  .filter-pill { min-height: 40px; display: inline-flex; align-items: center; justify-content: center; }
+  .tx-del,
+  .icon-del,
+  .icon-btn,
+  .gc-add,
+  .gc-withdraw {
+    min-width: 40px;
+    min-height: 40px;
+  }
+  .form-row button,
+  .form-row select,
+  .form-row input,
+  .goal-form .field input,
+  .goal-form .field select { min-height: 46px; }
+
+  /* Charts never exceed their container width */
+  .chart-box { width: 100%; }
+  .chart-box canvas { max-width: 100%; }
 }

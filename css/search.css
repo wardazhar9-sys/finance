@@ -1,0 +1,287 @@
+/* ============================================================
+   search.css — styles for the reusable FinSearch widget
+   Matches the FinTrack dark/gold theme (variables from styles.css).
+   Light-mode friendly via prefers-color-scheme overrides at the end.
+   ============================================================ */
+
+.fsearch {
+  position: relative;
+  width: 100%;
+  max-width: 420px;
+  font-family: inherit;
+}
+
+/* Visually hidden but screen-reader accessible */
+.fsearch-visually-hidden {
+  position: absolute !important;
+  width: 1px; height: 1px;
+  padding: 0; margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ---------- input field ---------- */
+.fsearch-field {
+  position: relative;
+  display: flex;
+  align-items: center;
+  height: 46px;
+  border-radius: 12px;
+  background: rgba(8, 17, 32, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.18);
+  transition: border-color 0.25s ease, box-shadow 0.25s ease, background 0.25s ease, transform 0.25s ease;
+}
+.fsearch-field:hover {
+  border-color: rgba(212, 175, 55, 0.4);
+  background: rgba(8, 17, 32, 0.75);
+}
+/* Focus ring driven by the inner input's focus state */
+.fsearch-field:focus-within {
+  border-color: var(--gold, #D4AF37);
+  background: rgba(8, 17, 32, 0.85);
+  box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.18), 0 8px 24px rgba(0, 0, 0, 0.28);
+}
+
+.fsearch-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  flex-shrink: 0;
+  color: var(--muted, #9FB3C8);
+  font-size: 15px;
+  transition: color 0.25s ease;
+  pointer-events: none;
+}
+.fsearch-field:focus-within .fsearch-icon { color: var(--gold, #D4AF37); }
+
+.fsearch-input {
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  border: none;
+  outline: none;
+  background: transparent;
+  color: #fff;
+  font-family: inherit;
+  font-size: 14px;
+  padding: 0 6px 0 0;
+}
+.fsearch-input::placeholder { color: var(--muted, #9FB3C8); opacity: 0.85; }
+/* Hide the native search clear control; we provide our own. */
+.fsearch-input::-webkit-search-cancel-button,
+.fsearch-input::-webkit-search-decoration { -webkit-appearance: none; }
+
+/* Keyboard focus is shown on the field wrapper, so suppress the input's own. */
+.fsearch-input:focus-visible { outline: none; }
+
+/* ---------- clear (×) button ---------- */
+.fsearch-clear {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px; height: 30px;
+  margin-right: 8px;
+  flex-shrink: 0;
+  border: none;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--muted, #9FB3C8);
+  font-size: 13px;
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease, transform 0.2s ease;
+  animation: fsearchPop 0.18s ease;
+}
+.fsearch-clear:hover { background: rgba(255, 82, 82, 0.16); color: var(--red, #FF5252); }
+.fsearch-clear:focus-visible {
+  outline: 2px solid var(--gold, #D4AF37);
+  outline-offset: 2px;
+}
+.fsearch-clear[hidden] { display: none; }
+
+@keyframes fsearchPop {
+  from { opacity: 0; transform: scale(0.6); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+/* ---------- loading spinner ---------- */
+.fsearch-spinner {
+  width: 16px; height: 16px;
+  margin-right: 10px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  border: 2px solid rgba(212, 175, 55, 0.25);
+  border-top-color: var(--gold, #D4AF37);
+  animation: fsearchSpin 0.7s linear infinite;
+}
+.fsearch-spinner[hidden] { display: none; }
+@keyframes fsearchSpin { to { transform: rotate(360deg); } }
+
+/* ---------- results dropdown ---------- */
+.fsearch-results {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  right: 0;
+  z-index: 320;
+  max-height: min(420px, 60vh);
+  overflow-y: auto;
+  padding: 6px;
+  background: var(--card-solid, #112344);
+  border: 1px solid rgba(212, 175, 55, 0.18);
+  border-radius: 14px;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.03) inset;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  opacity: 0;
+  transform: translateY(-6px) scale(0.99);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+.fsearch-results.is-open { opacity: 1; transform: translateY(0) scale(1); }
+.fsearch-results[hidden] { display: none; }
+.fsearch-results::-webkit-scrollbar { width: 6px; }
+.fsearch-results::-webkit-scrollbar-thumb { background: rgba(212, 175, 55, 0.25); border-radius: 999px; }
+
+/* ---------- result item ---------- */
+.fsearch-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  background: transparent;
+  color: #fff;
+  font-family: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.18s ease, border-color 0.18s ease, transform 0.18s ease;
+  animation: fsearchFadeIn 0.22s ease both;
+}
+.fsearch-item:hover,
+.fsearch-item.is-active {
+  background: rgba(212, 175, 55, 0.1);
+  border-color: rgba(212, 175, 55, 0.22);
+  transform: translateX(2px);
+}
+.fsearch-item:focus-visible {
+  outline: 2px solid var(--gold, #D4AF37);
+  outline-offset: -2px;
+}
+
+@keyframes fsearchFadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.fsearch-item-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px; height: 38px;
+  flex-shrink: 0;
+  border-radius: 10px;
+  font-size: 14px;
+}
+.fsearch-item-body { flex: 1; min-width: 0; }
+.fsearch-item-title {
+  display: block;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.fsearch-item-sub {
+  display: block;
+  color: var(--muted, #9FB3C8);
+  font-size: 12px;
+  margin-top: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.fsearch-item-group {
+  flex-shrink: 0;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  font-weight: 600;
+  color: var(--muted, #9FB3C8);
+  background: rgba(255, 255, 255, 0.06);
+  padding: 3px 8px;
+  border-radius: 999px;
+}
+.fsearch-hl {
+  background: rgba(212, 175, 55, 0.28);
+  color: var(--gold-light, #F5D76E);
+  border-radius: 3px;
+  padding: 0 1px;
+}
+
+/* ---------- empty / error states ---------- */
+.fsearch-empty {
+  text-align: center;
+  padding: 30px 20px;
+  color: var(--muted, #9FB3C8);
+  animation: fsearchFadeIn 0.22s ease both;
+}
+.fsearch-empty i {
+  font-size: 26px;
+  margin-bottom: 12px;
+  color: rgba(212, 175, 55, 0.5);
+  display: block;
+}
+.fsearch-empty p { font-size: 14px; color: #fff; margin: 0; }
+.fsearch-error i { color: var(--red, #FF5252); }
+
+.fsearch-more {
+  padding: 10px 12px 6px;
+  text-align: center;
+  font-size: 12px;
+  color: var(--muted, #9FB3C8);
+}
+
+/* ---------- responsive ---------- */
+/* Tablet: let the search fill the available row width. */
+@media (max-width: 900px) {
+  .fsearch { max-width: 100%; }
+}
+/* Mobile: full-width, slightly taller touch target. */
+@media (max-width: 640px) {
+  .fsearch { max-width: 100%; }
+  .fsearch-field { height: 48px; }
+  .fsearch-results { max-height: min(60vh, 360px); }
+}
+
+/* ---------- reduced motion ---------- */
+@media (prefers-reduced-motion: reduce) {
+  .fsearch-field,
+  .fsearch-clear,
+  .fsearch-item,
+  .fsearch-results,
+  .fsearch-empty { transition: none; animation: none; }
+  .fsearch-spinner { animation-duration: 1.2s; }
+}
+
+/* ---------- light-mode compatibility ---------- */
+/* Activates only if the page/user prefers a light theme. The app is dark by
+   default, so these are graceful fallbacks rather than the primary styling. */
+@media (prefers-color-scheme: light) {
+  .fsearch-light .fsearch-field {
+    background: #fff;
+    border-color: rgba(0, 0, 0, 0.12);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
+  }
+  .fsearch-light .fsearch-input { color: #1a2233; }
+  .fsearch-light .fsearch-results {
+    background: #fff;
+    border-color: rgba(0, 0, 0, 0.08);
+  }
+  .fsearch-light .fsearch-item-title { color: #1a2233; }
+}

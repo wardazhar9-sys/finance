@@ -144,3 +144,4 @@ bindFormInputClear([
 ], 'txFormError');
 syncCategoryOptions();
 render();
+bindCurrencyRefresh(render);
