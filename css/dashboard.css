@@ -506,10 +506,16 @@ button.plan-badge-host > .plan-corner-badge {
   border-radius: 10px;
   display: grid;
   place-items: center;
-  background: rgba(212, 175, 55, 0.12);
-  color: var(--gold);
+  background: linear-gradient(135deg, var(--gold), var(--gold-light));
+  color: #0A192F;
   font-size: 14px;
   flex-shrink: 0;
+  box-shadow: 0 0 16px rgba(212, 175, 55, 0.3);
+}
+
+.mobile-app-brand .logo-icon i {
+  color: #0A192F;
+  font-size: 14px;
 }
 
 .mobile-app-brand .logo-text {
@@ -1371,7 +1377,8 @@ button.plan-badge-host > .plan-corner-badge {
 
   .main {
     padding: 12px 12px 40px;
-    padding-top: calc(64px + env(safe-area-inset-top, 0px));
+    /* Keep page title/subtitle below the fixed phone app bar */
+    padding-top: calc(72px + env(safe-area-inset-top, 0px));
     gap: 16px;
     width: 100%;
     max-width: 100vw;
@@ -1424,7 +1431,7 @@ button.plan-badge-host > .plan-corner-badge {
   }
 
   .notif-panel {
-    top: calc(64px + env(safe-area-inset-top, 0px));
+    top: calc(72px + env(safe-area-inset-top, 0px));
     right: 12px;
     left: 12px;
     width: auto;
@@ -1595,7 +1602,8 @@ button.plan-badge-host > .plan-corner-badge {
 
   .main {
     padding-inline: 10px;
-    padding-top: 10px;
+    /* Do not collapse top offset — fixed app bar still covers content under 420px */
+    padding-top: calc(72px + env(safe-area-inset-top, 0px));
   }
 
   .topbar { padding-left: 0; }

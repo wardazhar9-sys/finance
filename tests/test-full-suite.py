@@ -536,6 +536,8 @@ def test_dashboard_form_validation():
     assert_('mobileAppBar' in app_nav and 'hamburger-line' in app_nav, 'app-nav phone top-right hamburger bar')
     assert_('mobile-app-bar' in dash_css and 'hamburger-line' in dash_css, 'dashboard phone hamburger styles')
     assert_('translateX(105%)' in dash_css, 'phone drawer slides from the right')
+    assert_('padding-top: calc(72px + env(safe-area-inset-top, 0px))' in dash_css, 'phone content clears fixed app bar')
+    assert_('.mobile-app-brand .logo-icon' in dash_css and 'linear-gradient(135deg, var(--gold), var(--gold-light))' in dash_css, 'phone brand logo stays bright')
     assert_('side-footer' in app_nav, 'app-nav groups currency + logout in footer')
     assert_('sidebar.is-open' in dash_css and 'min-width: 641px' in dash_css and '@media (max-width: 640px)' in dash_css, 'dashboard tablet/phone drawer breakpoints')
     assert_('.panel.inbox-panel' in dash_css and 'grid-template-columns: 1fr' in dash_css, 'inbox panel can collapse to one column')
