@@ -11,7 +11,9 @@
     function showToast() {}
     window.showToast = showToast;
   </script>
+  <script src="../js/currency-data.js"></script>
   <script src="../js/storage.js"></script>
+  <script src="../js/currency.js"></script>
   <script src="../js/plans.js"></script>
   <script>
     (function () {
@@ -109,6 +111,18 @@
         assert(totalNetWorth({ assets: [{ value: 1000 }, { value: 500 }], liabilities: [{ value: 200 }] }) === 1300, 'networth_math');
         const moneyStr = String(typeof money === 'function' ? money(1234) : '');
         assert(/1234/.test(moneyStr.replace(/[^\d]/g, '')), 'money_format', moneyStr);
+
+        // Currency preference
+        assert(typeof getUserCurrency === 'function', 'getUserCurrency_fn');
+        assert(typeof setUserCurrency === 'function', 'setUserCurrency_fn');
+        assert(typeof formatMoney === 'function', 'formatMoney_fn');
+        setUserCurrency('EUR');
+        assert(getUserCurrency() === 'EUR', 'currency_set_eur');
+        const eurStr = String(money(1234));
+        assert(/€|EUR|1.?234/i.test(eurStr), 'money_eur_format', eurStr);
+        setUserCurrency('USD');
+        assert(getUserCurrency() === 'USD', 'currency_back_usd');
+        assert(getData().profile.currency === 'USD', 'profile_currency_persisted');
 
         const txs = [
           { id: '1', type: 'income', amount: 1000, category: 'Salary', date: localDateStr() },

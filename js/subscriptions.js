@@ -170,3 +170,5 @@ bindFormInputClear([
 render();
 
 } // premium gate
+
+if (typeof bindCurrencyRefresh === 'function') bindCurrencyRefresh(render);

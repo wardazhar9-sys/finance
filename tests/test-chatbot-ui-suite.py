@@ -68,6 +68,8 @@ CORE_ASSETS = [
     "/css/landing.css",
     "/css/dashboard.css",
     "/css/auth.css",
+    "/css/currency.css",
+    "/css/search.css",
     "/css/chatbot.css",
     "/js/storage.js",
     "/js/loader.js",
@@ -75,6 +77,10 @@ CORE_ASSETS = [
     "/js/nav.js",
     "/js/app-nav.js",
     "/js/ui.js",
+    "/js/currency-data.js",
+    "/js/currency.js",
+    "/js/currency-select.js",
+    "/js/search.js",
     "/js/plans.js",
     "/js/chatbot.js",
     "/js/dashboard.js",
@@ -284,13 +290,23 @@ def main():
     ok("z-index: 99990" in chat_css, "chatbot floats above app chrome")
     ok("Sign Up Free" in chat_js or "Sign Up" in chat_js, "signup-first CTAs present")
 
-    section("6) Plan modules present (v7 tiers)")
+    section("6) Currency + search + plan modules present")
+    ok((ROOT / "js/currency.js").exists(), "currency.js exists")
+    ok((ROOT / "css/currency.css").exists(), "currency.css exists")
+    ok((ROOT / "js/search.js").exists(), "search.js exists")
+    ok((ROOT / "css/search.css").exists(), "search.css exists")
     ok((ROOT / "js/plans.js").exists(), "plans.js exists")
     ok((ROOT / "js/storage.js").exists(), "storage.js exists")
     pricing = page_html.get("/pages/pricing.html", "")
     ok("plans.js" in pricing or "data-plan" in pricing or "Pro" in pricing, "pricing page exposes plans")
     dash = page_html.get("/pages/dashboard.html", "")
     ok("app-nav.js" in dash, "dashboard loads app-nav.js")
+    ok("currency.js" in dash, "dashboard loads currency.js")
+    ok("search.js" in dash, "dashboard loads search.js")
+    ok("dashSearch" in dash, "dashboard has dashSearch mount")
+    ok("currencySelectMount" in (ROOT / "js/app-nav.js").read_text(), "app-nav mounts currency select")
+    onboarding = page_html.get("/pages/onboarding.html", "")
+    ok("of 6" in onboarding and "currencySelectMount" in onboarding, "onboarding has currency step (6 steps)")
     ok("storage.js" in dash or "loader.js" in dash, "dashboard loads storage via page/loader")
     ok("chatbot" not in dash.lower() or True, "dashboard still valid with chatbot via loader")
 

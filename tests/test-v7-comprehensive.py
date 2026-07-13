@@ -267,8 +267,22 @@ def test_source_gates():
     ok("renderPlanGate('premium'" in nw, "Net Worth gated to Premium")
     ok("renderPlanGate('premium'" in subs, "Subscriptions gated to Premium")
     ok("hasPlanAtLeast('pro')" in dash and "hasPlanAtLeast('premium')" in dash, "Overview locks Pro/Premium panels")
+    ok("buildSearchIndex" in dash and "initSearch" in dash and "bindCurrencyRefresh" in dash, "Overview search + currency refresh")
     ok("data-plan=\"premium\"" in nav or "is-premium" in nav, "sidebar Premium tags")
     ok("is-pro" in nav and "Subscriptions" in nav, "sidebar Pro tags + Subscriptions label")
+    ok("currencySelectMount" in nav and "mountSidebarCurrencySelect" in nav, "sidebar currency picker")
+
+    ok("currency: ''" in storage or "profile.currency" in storage, "storage profile.currency")
+    ok("getUserCurrency" in read("js/storage.js") or "formatMoney" in read("js/currency-data.js"), "currency helpers present")
+    ok("formatMoney" in read("js/currency-data.js"), "formatMoney in currency-data")
+    ok("getUserCurrency" in read("js/storage.js")[read("js/storage.js").find("function money"):read("js/storage.js").find("function money") + 220],
+       "money() uses getUserCurrency")
+
+    onboard = read("js/onboarding.js")
+    ok("TOTAL_STEPS = 6" in onboard and "initCurrencyStep" in onboard, "onboarding currency step")
+    ok("localDateStr" in onboard, "onboarding uses localDateStr for seed dates")
+    ok('id="dashSearch"' in read("pages/dashboard.html"), "dashboard search mount present")
+    ok((ROOT / "js/currency.js").exists() and (ROOT / "js/search.js").exists(), "currency + search assets present")
 
     ok("syncPricingCards" in pricing and "is-current" in pricing, "Pricing highlights current plan")
     ok("Switch to Free" in pricing or "changePlan('free')" in pricing, "Pricing allows downgrade")

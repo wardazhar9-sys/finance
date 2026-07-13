@@ -139,7 +139,7 @@ function renderChart(data) {
       plugins: { legend: { display: false } },
       scales: {
         x: { grid: { color: GRID }, ticks: { color: TICK } },
-        y: { beginAtZero: true, grid: { color: GRID }, ticks: { color: TICK, callback: (v) => '$' + Number(v).toLocaleString('en-US') } },
+        y: { beginAtZero: true, grid: { color: GRID }, ticks: { color: TICK, callback: (v) => (typeof chartMoneyTick === 'function' ? chartMoneyTick(v) : ('$' + Number(v).toLocaleString('en-US'))) } },
       },
     },
   });
@@ -166,7 +166,7 @@ function renderTrend(data) {
       plugins: { legend: { labels: { color: TICK, usePointStyle: true, boxWidth: 8 } } },
       scales: {
         x: { grid: { color: GRID }, ticks: { color: TICK } },
-        y: { grid: { color: GRID }, ticks: { color: TICK, callback: (v) => '$' + Number(v).toLocaleString('en-US') } },
+        y: { grid: { color: GRID }, ticks: { color: TICK, callback: (v) => (typeof chartMoneyTick === 'function' ? chartMoneyTick(v) : ('$' + Number(v).toLocaleString('en-US'))) } },
       },
     },
   });
@@ -221,3 +221,5 @@ bindFormInputClear([
 render();
 
 } // premium gate
+
+if (typeof bindCurrencyRefresh === 'function') bindCurrencyRefresh(render);

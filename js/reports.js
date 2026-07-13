@@ -60,7 +60,7 @@ function renderIncomeChart(data) {
       plugins: { legend: { labels: { color: TICK, usePointStyle: true, boxWidth: 8 } } },
       scales: {
         x: { grid: { color: GRID }, ticks: { color: TICK } },
-        y: { beginAtZero: true, grid: { color: GRID }, ticks: { color: TICK, callback: (v) => '$' + Number(v).toLocaleString('en-US') } },
+        y: { beginAtZero: true, grid: { color: GRID }, ticks: { color: TICK, callback: (v) => (typeof chartMoneyTick === 'function' ? chartMoneyTick(v) : ('$' + Number(v).toLocaleString('en-US'))) } },
       },
     },
   });
@@ -169,3 +169,5 @@ function render() {
 render();
 
 } // pro gate
+
+if (typeof bindCurrencyRefresh === 'function') bindCurrencyRefresh(render);

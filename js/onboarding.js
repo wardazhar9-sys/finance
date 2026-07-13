@@ -2,6 +2,16 @@
 
 requireAuth();
 
+// Already finished onboarding — don't seed duplicate data
+(function guardOnboarded() {
+  try {
+    const data = getData();
+    if (data && data.profile && data.profile.onboarded) {
+      window.location.href = 'dashboard.html';
+    }
+  } catch (_) { /* ignore */ }
+})();
+
 const TOTAL_STEPS = 6;
 let step = 1;
 let currencyPicker = null;
@@ -357,7 +367,7 @@ function finish() {
   }
   collectStep(step);
   const data = getData();
-  const today = new Date().toISOString().slice(0, 10);
+  const today = typeof localDateStr === 'function' ? localDateStr() : new Date().toISOString().slice(0, 10);
 
   data.profile = {
     onboarded: true,
@@ -392,7 +402,7 @@ function finish() {
       priority: 'high',
       monthlyContribution: 0,
       note: 'Created during onboarding',
-      history: answers.goalSaved > 0 ? [{ id: uid(), date: new Date().toISOString().slice(0, 10), amount: answers.goalSaved, type: 'deposit', note: 'Initial balance' }] : [],
+      history: answers.goalSaved > 0 ? [{ id: uid(), date: today, amount: answers.goalSaved, type: 'deposit', note: 'Initial balance' }] : [],
     }));
   }
 

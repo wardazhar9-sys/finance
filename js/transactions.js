@@ -193,3 +193,5 @@ document.getElementById('txAddBtn')?.addEventListener('click', (e) => {
 });
 syncCategoryOptions();
 render();
+
+if (typeof bindCurrencyRefresh === 'function') bindCurrencyRefresh(render);

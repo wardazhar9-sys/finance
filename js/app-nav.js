@@ -1,6 +1,6 @@
 /* app-nav.js — shared sidebar for all authenticated app pages */
 
-const APP_NAV_VERSION = 14;
+const APP_NAV_VERSION = 15;
 
 const APP_NAV_LINKS = [
   { page: 'dashboard', href: 'dashboard.html', icon: 'fa-gauge-high', label: 'Overview' },
@@ -56,7 +56,19 @@ function renderAppNav(activePage) {
       </div>
     </div>
     <nav class="side-nav">${links}</nav>
+    <div class="side-currency">
+      <div class="side-currency-label"><i class="fa-solid fa-coins"></i> Currency</div>
+      <div id="currencySelectMount"></div>
+    </div>
     <button class="side-logout" onclick="logout()"><i class="fa-solid fa-arrow-right-from-bracket"></i> Log Out</button>`;
+
+  if (typeof mountSidebarCurrencySelect === 'function') {
+    const mount = document.getElementById('currencySelectMount');
+    if (mount) {
+      mount.dataset.mounted = '';
+      mountSidebarCurrencySelect();
+    }
+  }
 }
 
 function topUpDemoWallet() {

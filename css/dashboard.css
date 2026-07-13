@@ -346,6 +346,9 @@ button.plan-badge-host > .plan-corner-badge {
 .topbar .greeting span { color: var(--gold); }
 .topbar .greeting p { color: var(--muted); font-size: 14px; margin-top: 4px; }
 .topbar-actions { display: flex; align-items: center; gap: 12px; flex-shrink: 0; overflow: visible; }
+/* Dashboard search: sits inline to the right of the title, before the actions */
+.dash-search { margin-left: auto; min-width: 0; }
+@media (max-width: 900px) { .dash-search { width: 100%; margin-left: 0; order: 3; } }
 
 /* notifications bell */
 .notif-wrap { position: relative; flex-shrink: 0; z-index: 210; }

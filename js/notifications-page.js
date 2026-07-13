@@ -172,4 +172,5 @@ document.getElementById('inboxList').addEventListener('click', (e) => {
 });
 
 renderInbox();
+
 if (typeof bindCurrencyRefresh === 'function') bindCurrencyRefresh(renderInbox);

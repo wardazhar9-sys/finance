@@ -482,10 +482,30 @@ def test_dashboard_form_validation():
     onboarding = (ROOT / 'js/onboarding.js').read_text()
     assert_('function validateStep' in onboarding, 'onboarding.js validates wizard steps')
     assert_('addEventListener(\'click\', nextStep)' in onboarding, 'onboarding wires Continue button in JS')
+    assert_('TOTAL_STEPS = 6' in onboarding, 'onboarding has 6 steps including currency')
+    assert_('initCurrencyStep' in onboarding, 'onboarding initializes currency step')
+    assert_('localDateStr' in onboarding, 'onboarding seeds dates with localDateStr')
+    assert_('profile.onboarded' in onboarding, 'onboarding guards already-onboarded users')
 
     onboarding_html = (ROOT / 'pages/onboarding.html').read_text()
     assert_(re.search(r'auth\.css\?v=\d+', onboarding_html), 'Onboarding loads versioned auth.css')
     assert_(re.search(r'onboarding\.js\?v=\d+', onboarding_html), 'Onboarding loads versioned onboarding.js')
+    assert_('currencySelectMount' in onboarding_html, 'Onboarding has currency picker mount')
+    assert_('of 6' in onboarding_html, 'Onboarding HTML shows 6 steps')
+
+    # Currency + search wiring
+    storage = (ROOT / 'js/storage.js').read_text()
+    assert_('profile.currency' in storage or "currency: ''" in storage, 'storage tracks profile.currency')
+    assert_('getUserCurrency' in storage or 'formatMoney' in (ROOT / 'js/currency-data.js').read_text(), 'currency helpers available')
+    assert_('formatMoney' in (ROOT / 'js/currency-data.js').read_text(), 'formatMoney in currency-data')
+    money_fn = storage[storage.find('function money'):storage.find('function money') + 200]
+    assert_('getUserCurrency' in money_fn or 'formatMoney' in money_fn, 'money() delegates to currency helpers')
+    assert_((ROOT / 'js/currency.js').exists(), 'currency.js present')
+    assert_((ROOT / 'js/search.js').exists(), 'search.js present')
+    dash_html = (ROOT / 'pages/dashboard.html').read_text()
+    assert_('id="dashSearch"' in dash_html, 'dashboard has search mount')
+    assert_('currency.js' in dash_html and 'search.js' in dash_html, 'dashboard loads currency + search')
+    assert_('currencySelectMount' in (ROOT / 'js/app-nav.js').read_text(), 'sidebar currency mount')
 
     for page, form_id in [
         ('pages/transactions.html', 'txFormError'),
@@ -497,6 +517,7 @@ def test_dashboard_form_validation():
         html = (ROOT / page).read_text()
         assert_(form_id in html, f'{page} includes {form_id}')
         assert_('ui.js?v=' in html, f'{page} loads ui.js')
+        assert_('currency.js' in html, f'{page} loads currency.js')
 
 
 def main():

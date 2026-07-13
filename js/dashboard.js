@@ -60,7 +60,7 @@ function renderTrend(data) {
           beginAtZero: true,
           suggestedMax: peak > 0 ? Math.ceil(peak * 1.15) : undefined,
           grid: { color: GRID },
-          ticks: { color: TICK, callback: (v) => '$' + Number(v).toLocaleString('en-US') },
+          ticks: { color: TICK, callback: (v) => (typeof chartMoneyTick === 'function' ? chartMoneyTick(v) : ('$' + Number(v).toLocaleString('en-US'))) },
         },
       },
     },
@@ -114,10 +114,9 @@ function renderBudget(data) {
     ] },
     options: { responsive: true, maintainAspectRatio: false,
       plugins: { legend: { labels: { color: TICK, usePointStyle: true, boxWidth: 8 } } },
-      scales: { x: { grid: { color: GRID }, ticks: { color: TICK } }, y: { grid: { color: GRID }, ticks: { color: TICK, callback: (v) => '$' + v } } } },
+      scales: { x: { grid: { color: GRID }, ticks: { color: TICK } }, y: { grid: { color: GRID }, ticks: { color: TICK, callback: (v) => (typeof chartMoneyTick === 'function' ? chartMoneyTick(v) : ('$' + v)) } } } },
   });
 }
-
 /* ---------- goals (read-only summary) ---------- */
 function renderGoals(data) {
   const wrap = document.getElementById('goalsList');
@@ -192,27 +191,108 @@ function lockPanel(selector, planName, blurb) {
   if (typeof applyPlanBadges === 'function') applyPlanBadges();
 }
 
-/* ---------- init ---------- */
-(function init() {
-  const user = currentUser();
-  const data = getData();
+/* ---------- global search index ---------- */
+function buildSearchIndex(data) {
+  const items = [];
 
-  if (!data.profile.onboarded) { window.location.href = 'onboarding.html'; return; }
+  data.transactions.forEach((t) => {
+    const isIncome = t.type === 'income';
+    items.push({
+      group: 'Transaction',
+      icon: catIcon(t.category),
+      color: isIncome ? '#00E676' : '#FF5252',
+      title: t.note ? `${t.category} · ${t.note}` : t.category,
+      subtitle: `${isIncome ? '+' : '-'}${money(t.amount)} · ${t.date}`,
+      keywords: [t.category, t.note, t.type, t.date, String(t.amount)],
+      url: 'transactions.html',
+    });
+  });
 
-  document.getElementById('userName').textContent = user.name.split(' ')[0];
-  if (data.profile.moneyStyle && STYLE_TIPS[data.profile.moneyStyle]) {
-    document.getElementById('styleTip').textContent = STYLE_TIPS[data.profile.moneyStyle];
-  }
+  data.goals.forEach((g) => {
+    const meta = goalMeta(g.category);
+    items.push({
+      group: 'Goal',
+      icon: meta.icon,
+      color: meta.color,
+      title: g.name,
+      subtitle: `${money(g.saved)} / ${money(g.target)} · ${goalProgress(g)}%`,
+      keywords: [g.name, meta.label, g.note, 'goal'],
+      url: 'goals.html',
+    });
+  });
 
-  renderKPIs(data);
-  renderCategory(data);
-  renderGoals(data);
-  renderRecent(data);
-  initNotifications(data);
+  Object.entries(data.budgets).forEach(([category, limit]) => {
+    items.push({
+      group: 'Budget',
+      icon: catIcon(category),
+      color: '#D4AF37',
+      title: category,
+      subtitle: `Monthly limit ${money(limit)}`,
+      keywords: [category, 'budget', 'limit'],
+      url: 'budgets.html',
+    });
+  });
 
+  (data.subscriptions || []).forEach((s) => {
+    items.push({
+      group: 'Subscription',
+      icon: (typeof SUB_CATEGORIES !== 'undefined' && SUB_CATEGORIES[s.category]) || 'fa-rotate',
+      color: '#9D7BFF',
+      title: s.name,
+      subtitle: `${money(s.amount)} · ${s.cycle || 'monthly'}${s.active ? '' : ' · paused'}`,
+      keywords: [s.name, s.category, s.cycle, 'subscription', s.note],
+      url: 'subscriptions.html',
+    });
+  });
+
+  const nw = data.netWorth || { assets: [], liabilities: [] };
+  (nw.assets || []).forEach((a) => {
+    const meta = (typeof ASSET_TYPES !== 'undefined' && ASSET_TYPES[a.type]) || { label: 'Asset', icon: 'fa-gem' };
+    items.push({
+      group: 'Asset',
+      icon: meta.icon,
+      color: '#00E676',
+      title: a.name,
+      subtitle: `${money(a.value)} · ${meta.label}`,
+      keywords: [a.name, a.type, meta.label, 'asset', 'net worth'],
+      url: 'networth.html',
+    });
+  });
+
+  (nw.liabilities || []).forEach((l) => {
+    const meta = (typeof LIABILITY_TYPES !== 'undefined' && LIABILITY_TYPES[l.type]) || { label: 'Liability', icon: 'fa-file-invoice-dollar' };
+    items.push({
+      group: 'Liability',
+      icon: meta.icon,
+      color: '#FF5252',
+      title: l.name,
+      subtitle: `${money(l.value)} · ${meta.label}`,
+      keywords: [l.name, l.type, meta.label, 'liability', 'net worth'],
+      url: 'networth.html',
+    });
+  });
+
+  return items;
+}
+
+let dashSearchWidget = null;
+
+function initSearch() {
+  if (typeof FinSearch === 'undefined') return;
+  dashSearchWidget = FinSearch.mount('dashSearch', {
+    placeholder: 'Search transactions, categories, budgets...',
+    label: 'Search your finances',
+    persistKey: 'fintrack_dash_search',
+    maxResults: 8,
+    source: () => buildSearchIndex(getData()),
+    onSelect: (item) => { if (item && item.url) window.location.href = item.url; },
+  });
+}
+
+function applyPlanLocks() {
   if (hasPlanAtLeast('pro')) {
-    renderTrend(data);
-    renderBudget(data);
+    renderTrend(getData());
+    renderBudget(getData());
   } else {
     lockPanel('.chart-grid .panel:first-child', 'Pro', 'Income vs expense trends unlock on Pro.');
     lockPanel('.lower-grid .panel:last-child', 'Pro', 'Budget vs actual analysis unlocks on Pro.');
@@ -238,4 +318,47 @@ function lockPanel(selector, planName, blurb) {
       nwCard.querySelector('.kpi-sub').textContent = 'Upgrade to unlock';
     }
   }
+}
+
+function refreshDashboard() {
+  const data = getData();
+  renderKPIs(data);
+  renderCategory(data);
+  renderGoals(data);
+  renderRecent(data);
+  if (hasPlanAtLeast('pro')) {
+    renderTrend(data);
+    renderBudget(data);
+  }
+  if (!hasPlanAtLeast('premium')) {
+    const subsEl = document.getElementById('kpiSubs');
+    const nwEl = document.getElementById('kpiNetWorth');
+    if (subsEl) subsEl.textContent = 'Premium';
+    if (nwEl) nwEl.textContent = 'Premium';
+  }
+  if (!hasPlanAtLeast('pro')) {
+    const rateEl = document.getElementById('kpiReportRate');
+    if (rateEl) rateEl.textContent = 'Pro';
+  }
+  if (dashSearchWidget) dashSearchWidget.refresh();
+  if (typeof refreshNotifications === 'function') refreshNotifications();
+}
+
+/* ---------- init ---------- */
+(function init() {
+  const user = currentUser();
+  const data = getData();
+
+  if (!data.profile.onboarded) { window.location.href = 'onboarding.html'; return; }
+
+  document.getElementById('userName').textContent = user.name.split(' ')[0];
+  if (data.profile.moneyStyle && STYLE_TIPS[data.profile.moneyStyle]) {
+    document.getElementById('styleTip').textContent = STYLE_TIPS[data.profile.moneyStyle];
+  }
+
+  initSearch();
+  refreshDashboard();
+  initNotifications(data);
+  applyPlanLocks();
+  if (typeof bindCurrencyRefresh === 'function') bindCurrencyRefresh(refreshDashboard);
 })();

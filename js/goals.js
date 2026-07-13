@@ -361,3 +361,5 @@ bindFormInputClear([
   { field: 'goalNote', error: 'goalNoteError' },
 ], 'goalFormError');
 render();
+
+if (typeof bindCurrencyRefresh === 'function') bindCurrencyRefresh(render);
