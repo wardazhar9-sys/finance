@@ -8,6 +8,24 @@
   const path = (file) => (IN_PAGES ? '' : 'pages/') + file;
   const rootPath = (file) => (IN_PAGES ? '../' : '') + file;
 
+  /** Normalize chatbot links so Home-saved `pages/foo.html` never becomes `pages/pages/foo.html`. */
+  function fixNavHref(href) {
+    if (!href) return href;
+    const raw = String(href).trim();
+    if (!raw || /^(https?:|mailto:|#)/i.test(raw)) return raw;
+
+    let clean = raw.replace(/^\.\//, '');
+    while (clean.startsWith('../')) clean = clean.slice(3);
+    while (clean.startsWith('pages/')) clean = clean.slice(6);
+    clean = clean.replace(/^\/+/, '');
+
+    if (!clean || clean === 'index.html') return rootPath('index.html');
+    if (!/\.html$/i.test(clean)) return raw;
+    // Only rewrite plain site page links (no nested folders beyond pages/)
+    if (clean.includes('/')) return raw;
+    return path(clean);
+  }
+
   const KEY_STORAGE = 'fintrack_groq_api_key';
   const THREAD_STORAGE = 'fintrack_chat_thread_v2';
   const META_STORAGE = 'fintrack_chat_meta_v1';
@@ -988,14 +1006,12 @@
       .replace(/&/g, '&amp;')
       .replace(/</g, '&lt;')
       .replace(/>/g, '&gt;');
-    return escaped.replace(/(https?:\/\/[^\s<]+|mailto:[^\s<]+|(?:\.\.\/)?(?:pages\/)?[\w.-]+\.html)/g, (m) => {
-      let href = m;
-      if (!m.startsWith('http') && !m.startsWith('mailto:')) {
-        if (m.startsWith('../') || m.startsWith('pages/')) href = m;
-        else if (IN_PAGES) href = m.includes('/') ? m.replace(/^pages\//, '') : m;
-        else href = m.includes('/') ? m : `pages/${m}`;
+    return escaped.replace(/(https?:\/\/[^\s<]+|mailto:[^\s<]+|(?:\.\.\/)*(?:pages\/)*[\w.-]+\.html)/g, (m) => {
+      if (m.startsWith('http') || m.startsWith('mailto:')) {
+        return `<a href="${m}">${m}</a>`;
       }
-      return `<a href="${href}">${m}</a>`;
+      const href = fixNavHref(m);
+      return `<a href="${href}">${href}</a>`;
     });
   }
 
@@ -1140,7 +1156,7 @@
   function renderSuggestions(items) {
     ui.suggestions.innerHTML = items
       .map((c) => {
-        if (c.href) return `<a class="ft-chip ft-chip-link" href="${c.href}">${c.label}</a>`;
+        if (c.href) return `<a class="ft-chip ft-chip-link" href="${fixNavHref(c.href)}">${c.label}</a>`;
         return `<button type="button" class="ft-chip" data-send="${encodeURIComponent(c.send || c.label)}">${c.label}</button>`;
       })
       .join('');
@@ -1161,7 +1177,7 @@
       if (a.href) {
         const link = document.createElement('a');
         link.className = 'ft-action';
-        link.href = a.href;
+        link.href = fixNavHref(a.href);
         link.textContent = a.label;
         wrap.appendChild(link);
       } else if (a.send) {
