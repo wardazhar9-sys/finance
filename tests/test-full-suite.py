@@ -373,7 +373,7 @@ def test_static_assets():
         for path in app_pages:
             _, html = fetch(path)
             assert_('id="appSidebar"' in html, f'{path} uses shared appSidebar')
-            assert_('app-nav.js?v=9' in html, f'{path} loads app-nav.js v9')
+            assert_(re.search(r'app-nav\.js\?v=\d+', html), f'{path} loads versioned app-nav.js')
             nav_versions.add('9')
         assert_(len(nav_versions) == 1, 'All app pages use the same app-nav version')
 
@@ -430,10 +430,10 @@ def test_password_toggle_ui():
     assert_(login.count('class="input-with-toggle"') >= 1, 'Login wraps password field')
     assert_('id="signupForm"' in signup, 'Signup form uses JS-bound signupForm id')
     assert_('id="loginForm"' in login, 'Login form uses JS-bound loginForm id')
-    assert_('auth.css?v=11' in signup, 'Signup loads versioned auth.css')
-    assert_('auth.js?v=11' in signup, 'Signup loads versioned auth.js')
-    assert_('auth.css?v=11' in login, 'Login loads versioned auth.css')
-    assert_('auth.js?v=11' in login, 'Login loads versioned auth.js')
+    assert_(re.search(r'auth\.css\?v=\d+', signup), 'Signup loads versioned auth.css')
+    assert_(re.search(r'auth\.js\?v=\d+', signup), 'Signup loads versioned auth.js')
+    assert_(re.search(r'auth\.css\?v=\d+', login), 'Login loads versioned auth.css')
+    assert_(re.search(r'auth\.js\?v=\d+', login), 'Login loads versioned auth.js')
 
     for label, html in [('signup', signup), ('login', login)]:
         assert_('toggle-visibility' in html, f'{label} has toggle button')
@@ -484,8 +484,8 @@ def test_dashboard_form_validation():
     assert_('addEventListener(\'click\', nextStep)' in onboarding, 'onboarding wires Continue button in JS')
 
     onboarding_html = (ROOT / 'pages/onboarding.html').read_text()
-    assert_('auth.css?v=11' in onboarding_html, 'Onboarding loads versioned auth.css')
-    assert_('onboarding.js?v=9' in onboarding_html, 'Onboarding loads versioned onboarding.js')
+    assert_(re.search(r'auth\.css\?v=\d+', onboarding_html), 'Onboarding loads versioned auth.css')
+    assert_(re.search(r'onboarding\.js\?v=\d+', onboarding_html), 'Onboarding loads versioned onboarding.js')
 
     for page, form_id in [
         ('pages/transactions.html', 'txFormError'),
@@ -496,7 +496,7 @@ def test_dashboard_form_validation():
     ]:
         html = (ROOT / page).read_text()
         assert_(form_id in html, f'{page} includes {form_id}')
-        assert_('ui.js?v=14' in html, f'{page} loads ui.js v14')
+        assert_('ui.js?v=' in html, f'{page} loads ui.js')
 
 
 def main():

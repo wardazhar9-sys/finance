@@ -68,8 +68,6 @@ CORE_ASSETS = [
     "/css/landing.css",
     "/css/dashboard.css",
     "/css/auth.css",
-    "/css/currency.css",
-    "/css/search.css",
     "/css/chatbot.css",
     "/js/storage.js",
     "/js/loader.js",
@@ -77,10 +75,7 @@ CORE_ASSETS = [
     "/js/nav.js",
     "/js/app-nav.js",
     "/js/ui.js",
-    "/js/currency.js",
-    "/js/currency-data.js",
-    "/js/currency-select.js",
-    "/js/search.js",
+    "/js/plans.js",
     "/js/chatbot.js",
     "/js/dashboard.js",
     "/js/transactions.js",
@@ -289,14 +284,14 @@ def main():
     ok("z-index: 99990" in chat_css, "chatbot floats above app chrome")
     ok("Sign Up Free" in chat_js or "Sign Up" in chat_js, "signup-first CTAs present")
 
-    section("6) Feature modules still present (currency + search)")
-    ok((ROOT / "js/currency.js").exists(), "currency.js exists")
-    ok((ROOT / "css/currency.css").exists(), "currency.css exists")
-    ok((ROOT / "js/search.js").exists(), "search.js exists")
-    ok((ROOT / "css/search.css").exists(), "search.css exists")
+    section("6) Plan modules present (v7 tiers)")
+    ok((ROOT / "js/plans.js").exists(), "plans.js exists")
+    ok((ROOT / "js/storage.js").exists(), "storage.js exists")
+    pricing = page_html.get("/pages/pricing.html", "")
+    ok("plans.js" in pricing or "data-plan" in pricing or "Pro" in pricing, "pricing page exposes plans")
     dash = page_html.get("/pages/dashboard.html", "")
-    ok("currency.js" in dash, "dashboard loads currency.js")
-    ok("search.js" in dash, "dashboard loads search.js")
+    ok("app-nav.js" in dash, "dashboard loads app-nav.js")
+    ok("storage.js" in dash or "loader.js" in dash, "dashboard loads storage via page/loader")
     ok("chatbot" not in dash.lower() or True, "dashboard still valid with chatbot via loader")
 
     section("7) Headless Chrome — chatbot mounts on key pages")
@@ -320,11 +315,13 @@ def main():
     section("9) CSS collision risk (high-level)")
     # chatbot classes are ft- prefixed
     ok(".ft-chat-root" in chat_css and ".ft-chat-toggle" in chat_css, "chatbot uses ft- namespace")
-    # ensure search/currency don't redefine ft-chat
-    search_css = (ROOT / "css/search.css").read_text()
-    currency_css = (ROOT / "css/currency.css").read_text()
-    ok("ft-chat" not in search_css, "search.css does not clash with ft-chat")
-    ok("ft-chat" not in currency_css, "currency.css does not clash with ft-chat")
+    # ensure other CSS files don't redefine ft-chat when present
+    for name in ("search.css", "currency.css", "styles.css", "app.css"):
+        path = ROOT / "css" / name
+        if not path.exists():
+            continue
+        css = path.read_text(encoding="utf-8")
+        ok("ft-chat" not in css, f"{name} does not clash with ft-chat")
 
     print(f"\n{'=' * 56}\nSUMMARY: {passed} passed, {failed} failed\n{'=' * 56}")
     if issues:

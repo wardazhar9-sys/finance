@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>FinTrack Plan Runtime Harness</title>
+</head>
+<body>
+  <pre id="OUT">running…</pre>
+  <script>
+    // Minimal stubs used by plans.js
+    function showToast() {}
+    window.showToast = showToast;
+  </script>
+  <script src="../js/storage.js"></script>
+  <script src="../js/plans.js"></script>
+  <script>
+    (function () {
+      const results = { cases: [], errors: [] };
+      const assert = (cond, name, detail) => {
+        results.cases.push({ name, pass: Boolean(cond), detail: detail || '' });
+      };
+
+      try {
+        localStorage.clear();
+
+        // Seed user on Free with $25
+        const userId = 'u-test-1';
+        const users = [{
+          id: userId,
+          name: 'Test User',
+          email: 'test@fintrack.demo',
+          password: 'pass123',
+          plan: 'free',
+          demoWallet: 25,
+        }];
+        localStorage.setItem('fintrack_users', JSON.stringify(users));
+        localStorage.setItem('fintrack_session', userId);
+        localStorage.setItem('fintrack_data_' + userId, JSON.stringify({
+          profile: { onboarded: true },
+          transactions: [],
+          budgets: {},
+          goals: [],
+          subscriptions: [],
+          netWorth: { assets: [], liabilities: [], history: [] },
+          alertReads: {},
+          notices: [],
+        }));
+
+        assert(getUserPlan() === 'free', 'start_free');
+        assert(getDemoWallet() === 25, 'start_wallet_25');
+        assert(hasPlanAtLeast('free') === true, 'rank_free_ok');
+        assert(hasPlanAtLeast('pro') === false, 'rank_free_no_pro');
+        assert(hasPlanAtLeast('premium') === false, 'rank_free_no_premium');
+
+        // Top-up
+        let top = addDemoFunds(10);
+        assert(top.ok && top.balance === 35, 'topup_10', JSON.stringify(top));
+
+        // Cannot buy premium with insufficient funds after spending to low
+        updateCurrentUser({ demoWallet: 5 });
+        let failPrem = purchasePlan('premium');
+        assert(!failPrem.ok && failPrem.needFunds, 'premium_need_funds');
+
+        // Buy Pro for $6 from $35
+        updateCurrentUser({ demoWallet: 35, plan: 'free', planStartedAt: null, planExpiresAt: null });
+        let buyPro = purchasePlan('pro');
+        assert(buyPro.ok && buyPro.plan === 'pro' && buyPro.charged === 6, 'buy_pro_ok', JSON.stringify(buyPro));
+        assert(getUserPlan() === 'pro', 'plan_is_pro');
+        assert(Math.abs(getDemoWallet() - 29) < 0.001, 'wallet_after_pro', String(getDemoWallet()));
+        assert(hasPlanAtLeast('pro') === true, 'rank_pro_includes_pro');
+        assert(hasPlanAtLeast('premium') === false, 'rank_pro_excludes_premium');
+        assert(!!currentUser().planExpiresAt, 'pro_has_expiry');
+        assert(getPlanDaysLeft() >= 29 && getPlanDaysLeft() <= 30, 'pro_days_left', String(getPlanDaysLeft()));
+
+        // Duplicate purchase blocked
+        let dup = purchasePlan('pro');
+        assert(!dup.ok, 'dup_pro_blocked');
+
+        // Upgrade to Premium for $12 from 29
+        let buyPrem = purchasePlan('premium');
+        assert(buyPrem.ok && buyPrem.plan === 'premium' && buyPrem.charged === 12, 'buy_premium_ok');
+        assert(getUserPlan() === 'premium', 'plan_is_premium');
+        assert(Math.abs(getDemoWallet() - 17) < 0.001, 'wallet_after_premium', String(getDemoWallet()));
+        assert(hasPlanAtLeast('free') && hasPlanAtLeast('pro') && hasPlanAtLeast('premium'), 'premium_includes_all');
+
+        // Downgrade to Pro (no charge)
+        let downPro = switchPlan('pro');
+        assert(downPro.ok && downPro.downgraded, 'downgrade_to_pro');
+        assert(getUserPlan() === 'pro', 'after_down_pro');
+        assert(getDemoWallet() === 17, 'downgrade_no_refund_charge');
+
+        // Downgrade to Free
+        let downFree = switchPlan('free');
+        assert(downFree.ok, 'downgrade_to_free');
+        assert(getUserPlan() === 'free', 'after_down_free');
+        assert(!currentUser().planExpiresAt, 'free_clears_expiry');
+
+        // Notices created
+        const data = getData();
+        assert(Array.isArray(data.notices) && data.notices.length >= 3, 'notices_recorded', String(data.notices.length));
+        assert(data.notices.some((n) => /Premium|Pro|Free/i.test(n.title || '')), 'notice_titles');
+
+        // Math helpers
+        assert(goalProgress({ target: 200, saved: 50 }) === 25, 'goal_progress_25');
+        assert(goalProgress({ target: 0, saved: 10 }) === 0, 'goal_progress_zero_target');
+        assert(goalProgress({ target: 100, saved: 150 }) === 100, 'goal_progress_capped');
+        assert(monthlySubCost({ amount: 120, cycle: 'yearly' }) === 10, 'sub_yearly');
+        assert(monthlySubCost({ amount: 10, cycle: 'weekly' }) === 43, 'sub_weekly');
+        assert(totalNetWorth({ assets: [{ value: 1000 }, { value: 500 }], liabilities: [{ value: 200 }] }) === 1300, 'networth_math');
+        const moneyStr = String(typeof money === 'function' ? money(1234) : '');
+        assert(/1234/.test(moneyStr.replace(/[^\d]/g, '')), 'money_format', moneyStr);
+
+        const txs = [
+          { id: '1', type: 'income', amount: 1000, category: 'Salary', date: localDateStr() },
+          { id: '2', type: 'expense', amount: 250, category: 'Food', date: localDateStr() },
+          { id: '3', type: 'expense', amount: 50, category: 'Transport', date: localDateStr() },
+        ];
+        const m = monthKey();
+        assert(sumByType(txs, 'income', m) === 1000, 'sum_income');
+        assert(sumByType(txs, 'expense', m) === 300, 'sum_expense');
+        assert(canonicalCategory('food') === 'Food', 'canonical_food');
+
+        // Expiry auto-downgrade
+        updateCurrentUser({
+          plan: 'premium',
+          demoWallet: 20,
+          planStartedAt: new Date(Date.now() - 40 * 864e5).toISOString(),
+          planExpiresAt: new Date(Date.now() - 864e5).toISOString(),
+        });
+        ensurePlanPeriod();
+        assert(getUserPlan() === 'free', 'expired_to_free');
+
+        // Free limits constants mirrored in app source (assert catalog prices)
+        assert(PLAN_CATALOG.pro.price === 6, 'pro_price_6');
+        assert(PLAN_CATALOG.premium.price === 12, 'premium_price_12');
+        assert(DEMO_TOPUP_AMOUNT === 10, 'topup_10');
+        assert(PLAN_PERIOD_DAYS === 30, 'period_30');
+      } catch (e) {
+        results.errors.push(String(e && e.stack || e));
+      }
+
+      document.getElementById('OUT').textContent = JSON.stringify(results);
+    })();
+  </script>
+</body>
+</html>
