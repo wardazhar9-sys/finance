@@ -21,7 +21,6 @@
 
     if (!clean || clean === 'index.html') return rootPath('index.html');
     if (!/\.html$/i.test(clean)) return raw;
-    // Only rewrite plain site page links (no nested folders beyond pages/)
     if (clean.includes('/')) return raw;
     return path(clean);
   }
@@ -113,7 +112,7 @@
       keywords: ['dashboard', 'overview', 'kpi', 'charts', 'home screen', 'summary', 'activity'],
       facts: [
         'Overview is your home base after login — KPIs, charts, goal/budget summaries, and recent activity.',
-        'It also links quickly to subscriptions, net worth, and reports.',
+        'Pro unlocks income vs expense trends and budget vs actual on Overview. Premium unlocks Subscriptions and Net Worth cards.',
         'Tips adapt to the money style you chose during onboarding.',
         'Open it: ' + path('dashboard.html'),
       ],
@@ -130,7 +129,8 @@
       keywords: ['transaction', 'expense', 'income', 'add entry', 'filter', 'delete', 'csv', 'export', 'spending', 'record'],
       facts: [
         'On Transactions you can add, filter, and delete income and expense entries.',
-        'You can export your data to CSV from this page.',
+        'Free plan allows up to 5 transactions. Pro and Premium unlock unlimited entries.',
+        'CSV export is a Pro+ feature (also included in Premium).',
         'Categories include Food, Rent, Transport, Shopping, Bills, Health, Entertainment, and Other.',
         'Open: ' + path('transactions.html'),
       ],
@@ -146,7 +146,8 @@
       title: 'Savings goals',
       keywords: ['goal', 'goals', 'savings', 'target', 'emergency', 'progress', 'fund', 'milestone', 'save for'],
       facts: [
-        'Goals lets you track multiple savings goals with categories, priorities, deadlines, filters, and editing.',
+        'Goals lets you track savings goals with categories, priorities, deadlines, filters, and editing.',
+        'Free includes 1 goal. Pro and Premium unlock unlimited goals.',
         'Progress bars show how close you are to each target.',
         'Onboarding creates your first goal — Emergency Fund, Save for Purchase, Pay Off Debt, or Invest & Grow.',
         'Open: ' + path('goals.html'),
@@ -160,8 +161,9 @@
       title: 'Budgets',
       keywords: ['budget', 'budgets', 'limit', 'monthly limit', 'overspend', 'category budget', 'budget vs', 'spending limit'],
       facts: [
-        'Budgets lets you set a monthly limit per category.',
-        'You can compare what you spent versus the limit, so overspending is obvious.',
+        'Budgets lets you set a monthly limit per category on Free, Pro, and Premium.',
+        'You can compare what you spent versus the limit on the Budgets page.',
+        'The Overview budget vs actual chart unlocks on Pro+.',
         'Open: ' + path('budgets.html'),
       ],
       cta: 'Notifications can also alert you when budgets need attention.',
@@ -177,6 +179,7 @@
       keywords: ['subscription', 'subscriptions', 'recurring', 'netflix', 'renewal', 'monthly cost', 'recurring payment'],
       facts: [
         'Subscriptions tracks recurring payments, renewal dates, and monthly cost totals.',
+        'This page is Premium-only. Free and Pro users are prompted to upgrade.',
         'It’s meant to catch the quiet drains that are easy to forget.',
         'Open: ' + path('subscriptions.html'),
       ],
@@ -190,6 +193,7 @@
       keywords: ['report', 'reports', 'monthly', 'yearly', 'print', 'breakdown', 'summary'],
       facts: [
         'Reports shows monthly and yearly summaries with printable breakdowns.',
+        'Reports and CSV export are Pro+ features (included in Premium too).',
         'Use it when you want the bigger picture beyond day-to-day tracking.',
         'Open: ' + path('reports.html'),
       ],
@@ -205,8 +209,8 @@
       title: 'Net worth',
       keywords: ['net worth', 'networth', 'assets', 'liabilities', 'wealth', 'history chart'],
       facts: [
-        'Net Worth tracks assets minus liabilities.',
-        'It includes a history chart so you can see how your position changes over time.',
+        'Net Worth tracks assets minus liabilities, with a history chart over time.',
+        'This page is Premium-only. Free and Pro users are prompted to upgrade.',
         'Open: ' + path('networth.html'),
       ],
       cta: 'Anything else on the dashboard you want clarified?',
@@ -231,11 +235,11 @@
       title: 'Pricing plans',
       keywords: ['pricing', 'price', 'plan', 'free', 'pro', 'premium', 'cost', 'charge', 'pay', 'subscription plan', 'tier', 'how much', 'compare', 'comparing'],
       facts: [
-        'Free is $0/mo: unlimited transactions, category chart, 1 savings goal, monthly budgets.',
-        'Pro is $6/mo: everything in Free plus unlimited goals, income vs expense trends, budget vs actual, and advanced insights.',
-        'Premium is $12/mo: everything in Pro plus CSV export, net worth, debt & subscription tools, priority support, and early access.',
-        'This is a demo — no real charges. Every plan opens the same local dashboard. Online payments show “coming soon.”',
-        'Pricing page: ' + path('pricing.html'),
+        'Free is $0: up to 5 transactions, category chart, 1 savings goal, monthly budgets, and notifications.',
+        'Pro costs $6 demo credits: everything in Free plus unlimited transactions & goals, income vs expense trends, budget vs actual, Reports page, and CSV export.',
+        'Premium costs $12 demo credits: everything in Free and Pro, plus net worth and subscription tracking.',
+        'No real money is charged. New accounts start with $25 demo wallet credits. You can Add $10 anytime from Pricing or the sidebar.',
+        'Upgrade on the Pricing page: ' + path('pricing.html'),
       ],
       cta: 'Want a 30-second Free vs Pro comparison?',
       actions: [
@@ -246,14 +250,14 @@
     {
       id: 'payments',
       pages: ['pricing'],
-      title: 'Payments / coming soon',
-      keywords: ['payment', 'checkout', 'stripe', 'buy', 'upgrade', 'coming soon', 'charged', 'do i pay'],
+      title: 'Demo wallet upgrades',
+      keywords: ['payment', 'checkout', 'stripe', 'buy', 'upgrade', 'coming soon', 'charged', 'do i pay', 'wallet', 'demo funds', 'demo wallet'],
       facts: [
-        'Online payments are the only feature that still shows a “coming soon” toast.',
-        'Choosing Pro or Premium does not collect payment.',
-        'In this demo, every plan unlocks the same local dashboard.',
+        'FinTrack uses a demo wallet instead of a real payment gateway.',
+        'Buy Pro ($6) or Premium ($12) with demo credits — nothing is charged to a card.',
+        'Premium includes Free and Pro features. Pro features are not available on Free. Premium-only features (Net Worth, Subscriptions) are not available on Pro or Free.',
       ],
-      cta: 'I can break down what each plan lists anyway, if that helps.',
+      cta: 'I can walk you through upgrading with demo funds.',
       actions: [{ label: 'View Plans', href: path('pricing.html') }],
     },
     {
@@ -308,9 +312,9 @@
       keywords: ['feature', 'features', 'capabilities', 'what can', 'pillars', 'see clearly', 'plan confidently', 'grow', 'what does it do'],
       facts: [
         'Pillar 1 — See Clearly: KPIs and charts for income, spending, and savings.',
-        'Pillar 2 — Plan Confidently: category budgets and budget vs actual.',
-        'Pillar 3 — Grow Consistently: savings goals with progress bars.',
-        'Also included: subscriptions, reports, net worth, notifications, CSV export, and money-style tips.',
+        'Pillar 2 — Plan Confidently: category budgets and budget vs actual (chart on Pro+).',
+        'Pillar 3 — Grow Consistently: savings goals with progress bars (1 on Free, unlimited on Pro+).',
+        'Plan extras: Free has limits; Pro adds unlimited tracking, Reports, and CSV; Premium adds Net Worth and Subscriptions.',
         'Features page: ' + path('features.html'),
       ],
       cta: 'Want a deeper dive into any one of those pillars?',
@@ -352,8 +356,8 @@
       keywords: ['faq', 'frequently', 'question', 'change plan', 'after sign up', 'really charged'],
       facts: [
         'Data safety: stored locally; nothing leaves your device.',
-        'Charges: no — plans are illustrative and no payment is collected.',
-        'Changing plans: in a real product yes; here you just explore the full dashboard.',
+        'Charges: no real card — upgrades use demo wallet credits ($25 starter, +$10 top-ups).',
+        'Changing plans: buy Pro ($6) or Premium ($12) on the Pricing page; higher plans keep lower-tier features.',
         'After signup: a 5-step questionnaire seeds your charts immediately.',
       ],
       cta: 'Any of those FAQ points you want expanded?',
@@ -598,16 +602,17 @@
     return {
       text:
         'Here’s a 30-second Free vs Pro comparison for FinTrack:\n\n' +
-        'Free ($0/mo)\n' +
-        '• Unlimited transactions + category chart\n' +
+        'Free ($0)\n' +
+        '• Up to 5 transactions + category chart\n' +
         '• 1 savings goal\n' +
         '• Monthly budgets\n\n' +
-        'Pro ($6/mo listed)\n' +
+        'Pro ($6 demo credits)\n' +
         '• Everything in Free\n' +
-        '• Unlimited goals\n' +
-        '• Income vs expense trends\n' +
-        '• Budget vs actual + advanced insights\n\n' +
-        'Important for this demo: payments are “coming soon,” and every plan opens the same local dashboard — Sign Up first so you can explore everything.',
+        '• Unlimited transactions & goals\n' +
+        '• Income vs expense + budget vs actual\n' +
+        '• Reports page + CSV export\n\n' +
+        'Premium ($12 demo credits) includes Free + Pro, and adds Net Worth and Subscriptions.\n\n' +
+        'New accounts start with $25 demo wallet credits — Sign Up, then upgrade on Pricing. No real card is charged.',
       actions: [
         { label: 'Sign Up Free', href: path('signup.html') },
         { label: 'See All Plans', href: path('pricing.html') },

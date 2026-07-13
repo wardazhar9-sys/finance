@@ -126,7 +126,7 @@ function handleSignup(e) {
   }
 
   const users = getUsers();
-  const user = { id: uid(), name, email, password };
+  const user = { id: uid(), name, email, password, plan: 'free', demoWallet: 25 };
   users.push(user);
   saveUsers(users);
   setSession(user.id);
@@ -163,6 +163,7 @@ function handleLogin(e) {
   }
 
   setSession(user.id);
+  updateCurrentUser({});
   const data = getData();
   const dest = data.profile.onboarded ? 'dashboard.html' : 'onboarding.html';
   showTransition('Welcome back...', dest);

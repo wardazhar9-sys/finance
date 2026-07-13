@@ -2,6 +2,7 @@
 
 requireAuth();
 
+const FREE_TX_LIMIT = 5;
 let activeFilter = 'all';
 
 function syncCategoryOptions() {
@@ -9,8 +10,47 @@ function syncCategoryOptions() {
   fillCategorySelect(document.getElementById('addCategory'), type);
 }
 
+function freeTxLimitReached() {
+  return typeof hasPlanAtLeast === 'function' && !hasPlanAtLeast('pro') && getData().transactions.length >= FREE_TX_LIMIT;
+}
+
+function promptTxUpgrade() {
+  showToast(
+    `Free plan limit reached: ${FREE_TX_LIMIT} transactions. Upgrade to Pro for unlimited entries.`,
+    'fa-crown'
+  );
+}
+
+function syncTxUpgradeUi() {
+  const btn = document.getElementById('txAddBtn');
+  const hint = document.getElementById('txPlanHint');
+  if (!btn) return;
+
+  if (typeof hasPlanAtLeast === 'function' && hasPlanAtLeast('pro')) {
+    btn.removeAttribute('data-plan');
+    btn.querySelectorAll('.plan-corner-badge').forEach((b) => b.remove());
+    btn.classList.remove('plan-badge-host');
+    if (hint) hint.textContent = 'Choose a type, enter a category and amount.';
+  } else {
+    btn.setAttribute('data-plan', 'pro');
+    if (hint) {
+      const used = getData().transactions.length;
+      const left = Math.max(0, FREE_TX_LIMIT - used);
+      hint.textContent = left > 0
+        ? `Free plan: ${used}/${FREE_TX_LIMIT} transactions used · Upgrade to Pro for unlimited.`
+        : `Free plan limit reached (${FREE_TX_LIMIT}). Upgrade to Pro to add more.`;
+    }
+  }
+  if (typeof applyPlanBadges === 'function') applyPlanBadges();
+}
+
 function addTransaction(e) {
   e.preventDefault();
+
+  if (freeTxLimitReached()) {
+    promptTxUpgrade();
+    return;
+  }
 
   const amountRaw = document.getElementById('addAmount').value;
   const dateInput = document.getElementById('addDate').value;
@@ -105,6 +145,8 @@ function renderList(data) {
 }
 
 function exportCSV() {
+  if (!ensurePlanFeature('pro', 'CSV export')) return;
+
   const data = getData();
   if (!data.transactions.length) {
     showToast('No transactions to export yet.', 'fa-circle-info');
@@ -133,6 +175,7 @@ function render() {
   renderKPIs(data);
   renderList(data);
   applyAlertFocusFromSession();
+  syncTxUpgradeUi();
 }
 
 /* default the date picker to today, then render */
@@ -142,6 +185,11 @@ bindFormInputClear([
   { field: 'addDate', error: 'addDateError' },
   { field: 'addNote', error: 'addNoteError' },
 ], 'txFormError');
+document.getElementById('txAddBtn')?.addEventListener('click', (e) => {
+  if (freeTxLimitReached()) {
+    e.preventDefault();
+    promptTxUpgrade();
+  }
+});
 syncCategoryOptions();
 render();
-bindCurrencyRefresh(render);

@@ -2,6 +2,10 @@
 
 requireAuth();
 
+if (!hasPlanAtLeast('premium')) {
+  renderPlanGate('premium', 'Subscription tracking');
+} else {
+
 const GRID = 'rgba(255,255,255,0.06)';
 const TICK = '#9FB3C8';
 let subChart;
@@ -164,4 +168,5 @@ bindFormInputClear([
   { field: 'subNote', error: 'subNoteError' },
 ], 'subFormError');
 render();
-bindCurrencyRefresh(render);
+
+} // premium gate

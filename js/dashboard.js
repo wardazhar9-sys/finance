@@ -60,7 +60,7 @@ function renderTrend(data) {
           beginAtZero: true,
           suggestedMax: peak > 0 ? Math.ceil(peak * 1.15) : undefined,
           grid: { color: GRID },
-          ticks: { color: TICK, callback: (v) => chartMoneyTick(v) },
+          ticks: { color: TICK, callback: (v) => '$' + Number(v).toLocaleString('en-US') },
         },
       },
     },
@@ -114,7 +114,7 @@ function renderBudget(data) {
     ] },
     options: { responsive: true, maintainAspectRatio: false,
       plugins: { legend: { labels: { color: TICK, usePointStyle: true, boxWidth: 8 } } },
-      scales: { x: { grid: { color: GRID }, ticks: { color: TICK } }, y: { grid: { color: GRID }, ticks: { color: TICK, callback: (v) => chartMoneyTick(v) } } } },
+      scales: { x: { grid: { color: GRID }, ticks: { color: TICK } }, y: { grid: { color: GRID }, ticks: { color: TICK, callback: (v) => '$' + v } } } },
   });
 }
 
@@ -173,122 +173,26 @@ function renderRecent(data) {
   });
 }
 
-/* ---------- global search index ---------- */
-/* Flattens all dashboard data into a single searchable list. Each entry is a
-   plain object the FinSearch widget understands: { group, icon, color, title,
-   subtitle, keywords, url }. Rebuilt on demand so results always reflect the
-   latest data (and the active currency). */
-function buildSearchIndex(data) {
-  const items = [];
-
-  data.transactions.forEach((t) => {
-    const isIncome = t.type === 'income';
-    items.push({
-      group: 'Transaction',
-      icon: catIcon(t.category),
-      color: isIncome ? '#00E676' : '#FF5252',
-      title: t.note ? `${t.category} · ${t.note}` : t.category,
-      subtitle: `${isIncome ? '+' : '-'}${money(t.amount)} · ${t.date}`,
-      keywords: [t.category, t.note, t.type, t.date, String(t.amount)],
-      url: 'transactions.html',
-    });
-  });
-
-  data.goals.forEach((g) => {
-    const meta = goalMeta(g.category);
-    items.push({
-      group: 'Goal',
-      icon: meta.icon,
-      color: meta.color,
-      title: g.name,
-      subtitle: `${money(g.saved)} / ${money(g.target)} · ${goalProgress(g)}%`,
-      keywords: [g.name, meta.label, g.note, 'goal'],
-      url: 'goals.html',
-    });
-  });
-
-  Object.entries(data.budgets).forEach(([category, limit]) => {
-    items.push({
-      group: 'Budget',
-      icon: catIcon(category),
-      color: '#D4AF37',
-      title: category,
-      subtitle: `Monthly limit ${money(limit)}`,
-      keywords: [category, 'budget', 'limit'],
-      url: 'budgets.html',
-    });
-  });
-
-  (data.subscriptions || []).forEach((s) => {
-    items.push({
-      group: 'Subscription',
-      icon: (typeof SUB_CATEGORIES !== 'undefined' && SUB_CATEGORIES[s.category]) || 'fa-rotate',
-      color: '#9D7BFF',
-      title: s.name,
-      subtitle: `${money(s.amount)} · ${s.cycle || 'monthly'}${s.active ? '' : ' · paused'}`,
-      keywords: [s.name, s.category, s.cycle, 'subscription', s.note],
-      url: 'subscriptions.html',
-    });
-  });
-
-  (data.netWorth.assets || []).forEach((a) => {
-    const meta = (typeof ASSET_TYPES !== 'undefined' && ASSET_TYPES[a.type]) || { label: 'Asset', icon: 'fa-gem' };
-    items.push({
-      group: 'Asset',
-      icon: meta.icon,
-      color: '#00E676',
-      title: a.name,
-      subtitle: `${money(a.value)} · ${meta.label}`,
-      keywords: [a.name, a.type, meta.label, 'asset', 'net worth'],
-      url: 'networth.html',
-    });
-  });
-
-  (data.netWorth.liabilities || []).forEach((l) => {
-    const meta = (typeof LIABILITY_TYPES !== 'undefined' && LIABILITY_TYPES[l.type]) || { label: 'Liability', icon: 'fa-file-invoice-dollar' };
-    items.push({
-      group: 'Liability',
-      icon: meta.icon,
-      color: '#FF5252',
-      title: l.name,
-      subtitle: `${money(l.value)} · ${meta.label}`,
-      keywords: [l.name, l.type, meta.label, 'liability', 'net worth'],
-      url: 'networth.html',
-    });
-  });
-
-  return items;
-}
-
-let dashSearchWidget = null;
-
-function initSearch() {
-  if (typeof FinSearch === 'undefined') return;
-  dashSearchWidget = FinSearch.mount('dashSearch', {
-    placeholder: 'Search transactions, categories, budgets...',
-    label: 'Search your finances',
-    persistKey: 'fintrack_dash_search',
-    maxResults: 8,
-    // Sources are read fresh on every query so results stay in sync with data.
-    source: () => buildSearchIndex(getData()),
-    onSelect: (item) => { if (item && item.url) window.location.href = item.url; },
-  });
+function lockPanel(selector, planName, blurb) {
+  const panel = document.querySelector(selector);
+  if (!panel || panel.querySelector('.panel-lock')) return;
+  panel.classList.add('is-locked');
+  const planKey = /premium/i.test(planName) ? 'premium' : 'pro';
+  panel.setAttribute('data-plan', planKey);
+  const overlay = document.createElement('div');
+  overlay.className = 'panel-lock';
+  overlay.innerHTML = `
+    <div class="panel-lock-card">
+      <i class="fa-solid fa-lock"></i>
+      <strong>${planName} feature</strong>
+      <p>${blurb}</p>
+      <a class="btn-gold" href="pricing.html">Upgrade</a>
+    </div>`;
+  panel.appendChild(overlay);
+  if (typeof applyPlanBadges === 'function') applyPlanBadges();
 }
 
 /* ---------- init ---------- */
-function refreshDashboard() {
-  const user = currentUser();
-  const data = getData();
-  renderKPIs(data);
-  renderTrend(data);
-  renderCategory(data);
-  renderBudget(data);
-  renderGoals(data);
-  renderRecent(data);
-  if (dashSearchWidget) dashSearchWidget.refresh();
-  if (typeof refreshNotifications === 'function') refreshNotifications();
-}
-
 (function init() {
   const user = currentUser();
   const data = getData();
@@ -300,8 +204,38 @@ function refreshDashboard() {
     document.getElementById('styleTip').textContent = STYLE_TIPS[data.profile.moneyStyle];
   }
 
-  initSearch();
-  refreshDashboard();
+  renderKPIs(data);
+  renderCategory(data);
+  renderGoals(data);
+  renderRecent(data);
   initNotifications(data);
-  bindCurrencyRefresh(refreshDashboard);
+
+  if (hasPlanAtLeast('pro')) {
+    renderTrend(data);
+    renderBudget(data);
+  } else {
+    lockPanel('.chart-grid .panel:first-child', 'Pro', 'Income vs expense trends unlock on Pro.');
+    lockPanel('.lower-grid .panel:last-child', 'Pro', 'Budget vs actual analysis unlocks on Pro.');
+    const reportsCard = document.querySelector('.dash-insights .insight-card:nth-child(3)');
+    if (reportsCard) {
+      reportsCard.onclick = () => { location.href = 'pricing.html'; };
+      document.getElementById('kpiReportRate').textContent = 'Pro';
+      reportsCard.querySelector('.kpi-sub').textContent = 'Upgrade to unlock Reports';
+    }
+  }
+
+  if (!hasPlanAtLeast('premium')) {
+    const subsCard = document.querySelector('.dash-insights .insight-card:nth-child(1)');
+    const nwCard = document.querySelector('.dash-insights .insight-card:nth-child(2)');
+    if (subsCard) {
+      subsCard.onclick = () => { location.href = 'pricing.html'; };
+      document.getElementById('kpiSubs').textContent = 'Premium';
+      subsCard.querySelector('.kpi-sub').textContent = 'Upgrade to unlock';
+    }
+    if (nwCard) {
+      nwCard.onclick = () => { location.href = 'pricing.html'; };
+      document.getElementById('kpiNetWorth').textContent = 'Premium';
+      nwCard.querySelector('.kpi-sub').textContent = 'Upgrade to unlock';
+    }
+  }
 })();

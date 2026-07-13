@@ -123,7 +123,7 @@ function loadFinTrackChatbot() {
   const inPages = location.pathname.includes('/pages/');
   const base = inPages ? '../' : '';
   const script = document.createElement('script');
-  script.src = `${base}js/chatbot.js?v=8`;
+  script.src = `${base}js/chatbot.js?v=9`;
   script.dataset.fintrackChatbot = '1';
   document.body.appendChild(script);
 }

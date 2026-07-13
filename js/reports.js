@@ -2,6 +2,10 @@
 
 requireAuth();
 
+if (!hasPlanAtLeast('pro')) {
+  renderPlanGate('pro', 'Reports & analytics');
+} else {
+
 const GRID = 'rgba(255,255,255,0.06)';
 const TICK = '#9FB3C8';
 const PALETTE = ['#D4AF37', '#6EA8FE', '#00E676', '#FF6B6B', '#F5D76E', '#3A7BD5', '#FF9F45', '#9D7BFF'];
@@ -56,7 +60,7 @@ function renderIncomeChart(data) {
       plugins: { legend: { labels: { color: TICK, usePointStyle: true, boxWidth: 8 } } },
       scales: {
         x: { grid: { color: GRID }, ticks: { color: TICK } },
-        y: { beginAtZero: true, grid: { color: GRID }, ticks: { color: TICK, callback: (v) => chartMoneyTick(v) } },
+        y: { beginAtZero: true, grid: { color: GRID }, ticks: { color: TICK, callback: (v) => '$' + Number(v).toLocaleString('en-US') } },
       },
     },
   });
@@ -129,6 +133,8 @@ function renderSummary(data) {
 }
 
 function exportReport() {
+  if (!ensurePlanFeature('pro', 'CSV export')) return;
+
   const data = getData();
   const months = monthlyTotals(data.transactions, reportRange);
   const lines = ['FinTrack Financial Report', `Generated: ${localDateStr()}`, ''];
@@ -161,4 +167,5 @@ function render() {
 }
 
 render();
-bindCurrencyRefresh(render);
+
+} // pro gate

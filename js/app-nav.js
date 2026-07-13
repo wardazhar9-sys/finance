@@ -1,6 +1,6 @@
 /* app-nav.js — shared sidebar for all authenticated app pages */
 
-const APP_NAV_VERSION = 11;
+const APP_NAV_VERSION = 14;
 
 const APP_NAV_LINKS = [
   { page: 'dashboard', href: 'dashboard.html', icon: 'fa-gauge-high', label: 'Overview' },
@@ -17,90 +17,64 @@ function renderAppNav(activePage) {
   const el = document.getElementById('appSidebar');
   if (!el) return;
 
-  const links = APP_NAV_LINKS.map((l) =>
-    `<a href="${l.href}"${l.page === activePage ? ' class="active"' : ''}><i class="fa-solid ${l.icon}"></i> ${l.label}</a>`
-  ).join('');
+  const user = typeof currentUser === 'function' ? currentUser() : null;
+  const plan = user && typeof planLabel === 'function' ? planLabel(user.plan) : 'Free';
+  const wallet = user && typeof getDemoWallet === 'function' ? getDemoWallet() : 0;
+
+  const links = APP_NAV_LINKS.map((l) => {
+    const lockedPremium =
+      (l.page === 'networth' || l.page === 'subscriptions') &&
+      typeof hasPlanAtLeast === 'function' &&
+      !hasPlanAtLeast('premium');
+    const lockedPro =
+      l.page === 'reports' &&
+      typeof hasPlanAtLeast === 'function' &&
+      !hasPlanAtLeast('pro');
+    let tag = '';
+    if (lockedPremium) {
+      tag = '<span class="side-plan-tag is-premium">Premium</span>';
+    } else if (lockedPro) {
+      tag = '<span class="side-plan-tag is-pro">Pro</span>';
+    }
+    const active = l.page === activePage ? ' class="active"' : '';
+    return `<a href="${l.href}"${active}><span class="side-link-main"><i class="fa-solid ${l.icon}"></i><span>${l.label}</span></span>${tag}</a>`;
+  }).join('');
 
   el.innerHTML = `
     <div class="logo" onclick="location.href='../index.html'">
       <div class="logo-icon"><i class="fa-solid fa-chart-line"></i></div>
       <div class="logo-text">Fin<span>Track</span></div>
     </div>
-    <nav class="side-nav">${links}</nav>
-    <div class="side-currency">
-      <div class="side-currency-label"><i class="fa-solid fa-coins"></i> Currency</div>
-      <div id="currencySelectMount"></div>
+    <div class="side-plan">
+      <div class="side-plan-row">
+        <span class="side-plan-badge">${plan}</span>
+        <span class="side-plan-wallet">$${Number(wallet).toFixed(2)}</span>
+      </div>
+      <div class="side-plan-actions">
+        <button type="button" class="side-plan-btn" onclick="location.href='pricing.html'">${plan === 'Free' ? 'Upgrade' : 'Manage'}</button>
+        <button type="button" class="side-plan-btn ghost" onclick="topUpDemoWallet()">Add $10</button>
+      </div>
     </div>
+    <nav class="side-nav">${links}</nav>
     <button class="side-logout" onclick="logout()"><i class="fa-solid fa-arrow-right-from-bracket"></i> Log Out</button>`;
-
-  if (typeof mountSidebarCurrencySelect === 'function') {
-    const mount = document.getElementById('currencySelectMount');
-    if (mount) {
-      mount.dataset.mounted = '';
-      mountSidebarCurrencySelect();
-    }
-  }
 }
 
-function closeAppDrawer() {
-  const sidebar = document.getElementById('appSidebar');
-  const overlay = document.getElementById('appNavOverlay');
-  const toggle = document.getElementById('appNavToggle');
-  if (sidebar) sidebar.classList.remove('is-open');
-  if (overlay) overlay.classList.remove('is-open');
-  document.body.classList.remove('app-nav-open');
-  if (toggle) toggle.setAttribute('aria-expanded', 'false');
-}
-
-function openAppDrawer() {
-  const sidebar = document.getElementById('appSidebar');
-  const overlay = document.getElementById('appNavOverlay');
-  const toggle = document.getElementById('appNavToggle');
-  if (sidebar) sidebar.classList.add('is-open');
-  if (overlay) overlay.classList.add('is-open');
-  document.body.classList.add('app-nav-open');
-  if (toggle) toggle.setAttribute('aria-expanded', 'true');
-}
-
-function buildAppMobileChrome() {
-  const main = document.querySelector('.app .main');
-  if (!main) return;
-
-  // Top bar with hamburger (prepended to main so it sits above page content)
-  if (!document.getElementById('appMobileBar')) {
-    const bar = document.createElement('div');
-    bar.className = 'app-mobile-bar';
-    bar.id = 'appMobileBar';
-    bar.innerHTML = `
-      <button type="button" class="app-nav-toggle" id="appNavToggle" aria-label="Open menu" aria-expanded="false" aria-controls="appSidebar">
-        <i class="fa-solid fa-bars"></i>
-      </button>
-      <div class="logo" onclick="location.href='dashboard.html'">
-        <div class="logo-icon"><i class="fa-solid fa-chart-line"></i></div>
-        <div class="logo-text">Fin<span>Track</span></div>
-      </div>`;
-    main.insertBefore(bar, main.firstChild);
-    bar.querySelector('#appNavToggle').addEventListener('click', openAppDrawer);
+function topUpDemoWallet() {
+  if (typeof addDemoFunds !== 'function') return;
+  const result = addDemoFunds(typeof DEMO_TOPUP_AMOUNT === 'number' ? DEMO_TOPUP_AMOUNT : 10);
+  if (!result.ok) {
+    if (typeof showToast === 'function') showToast(result.error || 'Could not add funds.', 'fa-circle-exclamation');
+    return;
   }
-
-  // Backdrop overlay
-  if (!document.getElementById('appNavOverlay')) {
-    const overlay = document.createElement('div');
-    overlay.className = 'app-nav-overlay';
-    overlay.id = 'appNavOverlay';
-    document.body.appendChild(overlay);
-    overlay.addEventListener('click', closeAppDrawer);
+  if (typeof showToast === 'function') {
+    showToast(`Added demo funds. Balance: $${result.balance.toFixed(2)}`, 'fa-coins');
   }
-
-  // Close interactions
-  document.querySelectorAll('#appSidebar .side-nav a').forEach((a) => {
-    a.addEventListener('click', closeAppDrawer);
-  });
-  if (!document.body.dataset.appNavBound) {
-    document.body.dataset.appNavBound = '1';
-    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeAppDrawer(); });
-    window.addEventListener('resize', () => { if (window.innerWidth > 820) closeAppDrawer(); });
+  const el = document.getElementById('appSidebar');
+  if (el) {
+    el.dataset.navInit = '0';
+    renderAppNav(el.dataset.page || '');
   }
+  if (typeof refreshPricingWallet === 'function') refreshPricingWallet();
 }
 
 function initAppNav() {
@@ -111,11 +85,13 @@ function initAppNav() {
   el.dataset.navInit = '1';
   el.dataset.navVersion = version;
   renderAppNav(el.dataset.page || '');
-  buildAppMobileChrome();
   if (typeof bindTransitionLinks === 'function') {
-    bindTransitionLinks('.side-nav a, .sidebar .logo, .app-mobile-bar .logo');
+    bindTransitionLinks('.side-nav a, .sidebar .logo');
   }
+  if (typeof applyPlanBadges === 'function') applyPlanBadges();
 }
+
+window.topUpDemoWallet = topUpDemoWallet;
 
 // Scripts load at end of body — sidebar exists; render immediately (not only on DOMContentLoaded)
 initAppNav();

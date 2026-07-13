@@ -7,6 +7,7 @@ const ALERT_TYPE_LABELS = {
   goal: 'Goals',
   subscription: 'Subscriptions',
   insight: 'Insights',
+  plan: 'Plans',
 };
 
 const SEVERITY_LABELS = {
@@ -220,9 +221,23 @@ function collectInsightAlerts(data, mKey) {
   return alerts;
 }
 
+function collectNoticeAlerts(data) {
+  return (data.notices || []).map((n) => ({
+    id: n.id,
+    type: n.type || 'plan',
+    severity: n.severity || 'info',
+    icon: n.icon || 'fa-crown',
+    title: n.title || 'Plan update',
+    message: n.message || '',
+    link: n.link || 'pricing.html',
+    focus: { noticeId: n.id },
+  }));
+}
+
 function collectAlerts(data) {
   const mKey = monthKey();
   const alerts = [
+    ...collectNoticeAlerts(data),
     ...collectBudgetAlerts(data, mKey),
     ...collectGoalAlerts(data),
     ...collectSubscriptionAlerts(data),
@@ -262,6 +277,10 @@ function alertFingerprint(alert, data, mKey) {
     const sub = (data.subscriptions || []).find((x) => x.id === alert.focus?.subId);
     if (!sub) return `${alert.id}:missing`;
     return `${sub.id}:${sub.renewDate}:${sub.amount}:${sub.active}`;
+  }
+
+  if (alert.type === 'plan') {
+    return `${alert.id}:${alert.title}:${alert.message}`;
   }
 
   const income = sumByType(data.transactions, 'income', m);

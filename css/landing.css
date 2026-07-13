@@ -214,29 +214,11 @@
 }
 
 @media (max-width: 650px) {
+  .nav-links, .buttons { display: none; }
   .hero-content h1 { font-size: 36px; }
   .dashboard-mockup { grid-template-columns: 1fr; grid-template-rows: auto; gap: 16px; padding: 16px; }
   .w-left-top, .w-right-top, .w-left-bottom, .w-right-bottom { grid-column: initial; grid-row: initial; }
   .stat-card { min-width: 110px; padding: 15px; }
-}
-
-/* ===== Marketing navbar → hamburger drawer ===== */
-@media (max-width: 1024px) {
-  .navbar { padding: 0 40px; }
-  .right-section { gap: 28px; }
-  .nav-links { gap: 24px; }
-}
-@media (max-width: 860px) {
-  .navbar { padding: 0 22px; }
-  .nav-links,
-  .buttons { display: none; }
-  .nav-toggle { display: flex; }
-}
-@media (max-width: 480px) {
-  .navbar { height: 76px; padding: 0 16px; }
-  .hero { min-height: calc(100vh - 76px); }
-  .logo-text { font-size: 22px; }
-  .logo-icon { width: 40px; height: 40px; }
 }
 
 /* ================= SUB-PAGE HERO (Features / Pricing) ================= */
@@ -293,18 +275,88 @@
 
 /* ================= PRICING ================= */
 .pricing-section { padding: 60px 70px 110px; background: #081120; position: relative; overflow: hidden; }
-.pricing-grid { max-width: 1180px; margin: 0 auto; display: grid; grid-template-columns: repeat(3, 1fr); gap: 26px; position: relative; z-index: 2; }
+.pricing-wallet-bar {
+  max-width: 760px;
+  margin: 0 auto 28px;
+  padding: 20px 22px;
+  border-radius: 16px;
+  border: 1px solid rgba(212, 175, 55, 0.22);
+  background: rgba(17, 34, 64, 0.55);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  text-align: center;
+  color: #CCD6F6;
+  font-size: 14px;
+  line-height: 1.55;
+}
+
+.pricing-wallet-bar strong { color: #F5D76E; }
+
+.pricing-wallet-copy {
+  max-width: 560px;
+}
+
+.pricing-wallet-meta {
+  font-size: 13px;
+  color: #9FB3C8;
+  min-height: 0;
+}
+
+.pricing-wallet-meta:empty { display: none; }
+
+.pricing-wallet-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+  align-items: center;
+}
+
+.pricing-grid {
+  max-width: 1180px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 26px;
+  align-items: stretch;
+  position: relative;
+  z-index: 2;
+}
+
 .price-card {
   background: linear-gradient(180deg, rgba(17, 34, 64, 0.72), rgba(10, 25, 47, 0.52));
   border: 1px solid rgba(255, 255, 255, 0.07);
   border-radius: 22px;
-  padding: 36px 30px;
+  padding: 36px 28px;
   transition: transform 0.4s ease, border-color 0.4s ease, box-shadow 0.4s ease;
-  display: flex; flex-direction: column;
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+  height: 100%;
 }
 .price-card:hover { transform: translateY(-8px); border-color: rgba(212, 175, 55, 0.3); box-shadow: 0 26px 55px rgba(0,0,0,0.34); }
-.price-card.featured { border-color: rgba(212, 175, 55, 0.45); background: linear-gradient(180deg, rgba(20, 40, 75, 0.82), rgba(10, 25, 47, 0.62)); }
+.price-card.featured:not(.is-current) {
+  border-color: rgba(212, 175, 55, 0.45);
+  background: linear-gradient(180deg, rgba(20, 40, 75, 0.82), rgba(10, 25, 47, 0.62));
+}
+.price-card.is-current {
+  border-color: rgba(212, 175, 55, 0.75);
+  box-shadow: 0 0 0 1px rgba(212, 175, 55, 0.3), 0 26px 55px rgba(0, 0, 0, 0.36);
+  background: linear-gradient(180deg, rgba(28, 48, 88, 0.95), rgba(12, 28, 52, 0.78));
+  transform: translateY(-10px);
+  z-index: 1;
+}
+.price-card.is-current:hover {
+  transform: translateY(-12px);
+}
 .price-badge { align-self: flex-start; background: rgba(212,175,55,0.12); color: #D4AF37; font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; padding: 6px 12px; border-radius: 999px; margin-bottom: 18px; }
+.price-card.is-current .price-badge {
+  background: #D4AF37;
+  color: #0A192F;
+}
 .price-card h3 { color: #fff; font-size: 20px; margin-bottom: 6px; font-weight: 600; }
 .price-card .price-desc { color: #9FB3C8; font-size: 13px; margin-bottom: 22px; font-weight: 300; min-height: 36px; }
 .price-amount { color: #fff; font-size: 42px; font-weight: 700; margin-bottom: 4px; font-family: 'Playfair Display', serif; }
@@ -326,8 +378,90 @@
   font-family: inherit; background: transparent; border: 1px solid rgba(212,175,55,0.5); color: #D4AF37; transition: 0.3s;
 }
 .price-card .btn-outline-block:hover { background: rgba(212,175,55,0.08); transform: translateY(-2px); }
+.price-card button:disabled,
+.price-card .is-current-btn:disabled {
+  opacity: 0.95;
+  cursor: default;
+  transform: none !important;
+  box-shadow: none;
+}
 
-@media (max-width: 1000px) { .pricing-grid { grid-template-columns: 1fr; max-width: 460px; } }
+/* Plan upgrade centered overlay */
+.plan-switch-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 12000;
+  display: none;
+  place-items: center;
+  padding: 24px;
+  background: rgba(5, 12, 24, 0.72);
+  backdrop-filter: blur(8px);
+}
+.plan-switch-overlay.open { display: grid; }
+.plan-switch-card {
+  width: min(420px, 100%);
+  border-radius: 22px;
+  border: 1px solid rgba(212, 175, 55, 0.28);
+  background: linear-gradient(180deg, rgba(17, 34, 64, 0.96), rgba(10, 25, 47, 0.96));
+  box-shadow: 0 30px 70px rgba(0, 0, 0, 0.45);
+  padding: 36px 28px;
+  text-align: center;
+}
+.plan-switch-body h3 {
+  color: #fff;
+  font-size: 24px;
+  margin: 14px 0 8px;
+}
+.plan-switch-body p {
+  color: #9FB3C8;
+  font-size: 14px;
+  line-height: 1.55;
+  margin: 0;
+}
+.plan-switch-spinner {
+  width: 46px;
+  height: 46px;
+  margin: 0 auto;
+  border-radius: 50%;
+  border: 3px solid rgba(212, 175, 55, 0.2);
+  border-top-color: #D4AF37;
+  animation: planSpin 0.8s linear infinite;
+}
+.plan-switch-icon {
+  width: 56px;
+  height: 56px;
+  margin: 0 auto;
+  border-radius: 16px;
+  display: grid;
+  place-items: center;
+  background: rgba(212, 175, 55, 0.14);
+  color: #D4AF37;
+  font-size: 22px;
+}
+.plan-switch-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+  margin-top: 22px;
+}
+.plan-switch-actions .btn-gold,
+.plan-switch-actions .btn-outline {
+  min-width: 140px;
+}
+@keyframes planSpin {
+  to { transform: rotate(360deg); }
+}
+
+@media (max-width: 1000px) {
+  .pricing-grid {
+    grid-template-columns: 1fr;
+    max-width: 460px;
+  }
+  .price-card.is-current {
+    transform: none;
+  }
+}
 @media (max-width: 650px) { .pricing-section { padding: 40px 22px 80px; } }
 
 /* ================= FAQ ================= */

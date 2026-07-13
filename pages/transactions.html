@@ -7,9 +7,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
-  <link rel="stylesheet" href="../css/styles.css?v=2"/>
-  <link rel="stylesheet" href="../css/dashboard.css?v=16"/>
-  <link rel="stylesheet" href="../css/currency.css?v=2"/>
+  <link rel="stylesheet" href="../css/styles.css"/>
+  <link rel="stylesheet" href="../css/dashboard.css?v=18"/>
 </head>
 <body>
   <div class="app">
@@ -22,7 +21,7 @@
           <h1>Transactions</h1>
           <p>Record income and expenses to keep every chart up to date.</p>
         </div>
-        <button class="btn-gold" onclick="exportCSV()"><i class="fa-solid fa-file-csv"></i> Export CSV</button>
+        <button class="btn-gold" data-plan="pro" onclick="exportCSV()"><i class="fa-solid fa-file-csv"></i> Export CSV</button>
       </div>
 
       <!-- KPIs -->
@@ -52,7 +51,7 @@
       <!-- ADD + LIST -->
       <section class="panel">
         <h3>Add a transaction</h3>
-        <p class="panel-sub">Choose a type, enter a category and amount.</p>
+        <p class="panel-sub" id="txPlanHint">Choose a type, enter a category and amount.</p>
 
         <form class="form-row" onsubmit="addTransaction(event)" novalidate>
           <select id="addType" onchange="syncCategoryOptions()">
@@ -63,7 +62,7 @@
           <input type="number" id="addAmount" placeholder="Amount" min="0" step="0.01"/>
           <input type="date" id="addDate"/>
           <input type="text" id="addNote" placeholder="Note (optional)"/>
-          <button type="submit"><i class="fa-solid fa-plus"></i> Add</button>
+          <button type="submit" id="txAddBtn" data-plan="pro"><i class="fa-solid fa-plus"></i> Add</button>
         </form>
         <p class="form-error" id="txFormError"></p>
 
@@ -79,14 +78,12 @@
     </main>
   </div>
 
-  <script src="../js/currency-data.js?v=1"></script>
-  <script src="../js/storage.js?v=14"></script>
-  <script src="../js/currency.js?v=1"></script>
-  <script src="../js/currency-select.js?v=1"></script>
+  <script src="../js/storage.js?v=16"></script>
   <script src="../js/ui.js?v=14"></script>
-  <script src="../js/loader.js?v=8"></script>
+  <script src="../js/loader.js?v=13"></script>
   <script src="../js/auth.js?v=7"></script>
-  <script src="../js/app-nav.js?v=11"></script>
-  <script src="../js/transactions.js?v=9"></script>
+  <script src="../js/plans.js?v=7"></script>
+  <script src="../js/app-nav.js?v=14"></script>
+  <script src="../js/transactions.js?v=11"></script>
 </body>
 </html>

@@ -11,7 +11,7 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
 
   <link rel="stylesheet" href="../css/styles.css?v=2"/>
-  <link rel="stylesheet" href="../css/landing.css?v=2"/>
+  <link rel="stylesheet" href="../css/landing.css?v=5"/>
 </head>
 
 <body>
@@ -58,9 +58,17 @@
   <!-- PAGE HERO -->
   <section class="page-hero">
     <div class="page-hero-inner">
-      <p class="tag">Simple, Honest Pricing</p>
-      <h1>Pick the plan that fits your <span>money goals</span>.</h1>
-      <p>Start free and upgrade only when you need more. No hidden fees — this is a demo project, so every plan unlocks the same local dashboard.</p>
+      <p class="tag" id="pricingHeroTag">Demo Wallet Billing</p>
+      <h1 id="pricingHeroTitle">Upgrade with <span>demo credits</span> — no real card needed.</h1>
+      <p id="pricingHeroSub">Start on Free. Use your demo wallet to unlock Pro or Premium. Every paid feature below is gated in the app so the plan you buy actually changes what you can do.</p>
+    </div>
+  </section>
+
+  <section class="pricing-section" style="padding-top:0;">
+    <div class="pricing-wallet-bar" id="pricingWalletBar">
+      <div class="pricing-wallet-copy" id="pricingWalletText">Log in to see your plan and demo wallet balance.</div>
+      <div class="pricing-wallet-meta" id="pricingWalletMeta"></div>
+      <div class="pricing-wallet-actions" id="pricingWalletActions"></div>
     </div>
   </section>
 
@@ -68,52 +76,51 @@
   <section class="pricing-section">
     <div class="pricing-grid">
 
-      <div class="price-card">
+      <div class="price-card" data-plan-card="free" data-badge="Starter">
         <span class="price-badge">Starter</span>
         <h3>Free</h3>
-        <p class="price-desc">Everything you need to start tracking your everyday money.</p>
+        <p class="price-desc">Track daily money with the essentials.</p>
         <div class="price-amount">$0<span> / month</span></div>
         <ul class="price-features">
-          <li><i class="fa-solid fa-check"></i> Unlimited transactions</li>
+          <li><i class="fa-solid fa-check"></i> Up to 5 transactions</li>
           <li><i class="fa-solid fa-check"></i> Spending by category chart</li>
           <li><i class="fa-solid fa-check"></i> 1 savings goal</li>
           <li><i class="fa-solid fa-check"></i> Monthly budgets</li>
-          <li class="off"><i class="fa-solid fa-xmark"></i> Advanced insights</li>
-          <li class="off"><i class="fa-solid fa-xmark"></i> Data export</li>
+          <li class="off"><i class="fa-solid fa-xmark"></i> Unlimited transactions &amp; goals</li>
+          <li class="off"><i class="fa-solid fa-xmark"></i> Reports, CSV, net worth &amp; subscriptions</li>
         </ul>
-        <button class="btn-outline-block" data-cta>Start Free</button>
+        <button class="btn-outline-block" type="button" id="btnFreePlan">Continue Free</button>
       </div>
 
-      <div class="price-card featured">
+      <div class="price-card" data-plan-card="pro" data-badge="Most Popular">
         <span class="price-badge">Most Popular</span>
         <h3>Pro</h3>
-        <p class="price-desc">For people who want deeper insight and more control over their plan.</p>
-        <div class="price-amount">$6<span> / month</span></div>
+        <p class="price-desc">For people who want deeper insight and more goals.</p>
+        <div class="price-amount">$6<span> demo credits</span></div>
         <ul class="price-features">
           <li><i class="fa-solid fa-check"></i> Everything in Free</li>
-          <li><i class="fa-solid fa-check"></i> Unlimited savings goals</li>
+          <li><i class="fa-solid fa-check"></i> Unlimited transactions &amp; goals</li>
           <li><i class="fa-solid fa-check"></i> Income vs. expense trends</li>
           <li><i class="fa-solid fa-check"></i> Budget vs. actual analysis</li>
-          <li><i class="fa-solid fa-check"></i> Advanced insights</li>
-          <li class="off"><i class="fa-solid fa-xmark"></i> Priority support</li>
+          <li><i class="fa-solid fa-check"></i> Reports page + CSV export</li>
+          <li class="off"><i class="fa-solid fa-xmark"></i> Net worth &amp; subscriptions</li>
         </ul>
-        <button class="btn-fill-block" onclick="comingSoon('Online payments')">Choose Pro</button>
+        <button class="btn-fill-block" id="btnProPlan" type="button">Buy Pro with demo wallet</button>
       </div>
 
-      <div class="price-card">
+      <div class="price-card" data-plan-card="premium" data-badge="Premium">
         <span class="price-badge">Premium</span>
         <h3>Premium</h3>
-        <p class="price-desc">The complete toolkit for serious, long-term financial planning.</p>
-        <div class="price-amount">$12<span> / month</span></div>
+        <p class="price-desc">Full toolkit for long-term planning and wealth tracking.</p>
+        <div class="price-amount">$12<span> demo credits</span></div>
         <ul class="price-features">
-          <li><i class="fa-solid fa-check"></i> Everything in Pro</li>
-          <li><i class="fa-solid fa-check"></i> Data export (CSV)</li>
+          <li><i class="fa-solid fa-check"></i> Everything in Free &amp; Pro</li>
           <li><i class="fa-solid fa-check"></i> Net worth tracking</li>
-          <li><i class="fa-solid fa-check"></i> Debt & subscription tools</li>
-          <li><i class="fa-solid fa-check"></i> Priority support</li>
-          <li><i class="fa-solid fa-check"></i> Early access features</li>
+          <li><i class="fa-solid fa-check"></i> Subscription tracking tools</li>
+          <li><i class="fa-solid fa-check"></i> Priority in-app support tips</li>
+          <li><i class="fa-solid fa-check"></i> Full dashboard access</li>
         </ul>
-        <button class="btn-outline-block" onclick="comingSoon('Online payments')">Go Premium</button>
+        <button class="btn-outline-block" id="btnPremiumPlan" type="button">Buy Premium with demo wallet</button>
       </div>
 
     </div>
@@ -125,23 +132,28 @@
       <h2>Frequently asked questions</h2>
 
       <div class="faq-item">
+        <button class="faq-q" onclick="toggleFaq(this)">How long does a paid plan last? Can I downgrade? <i class="fa-solid fa-plus"></i></button>
+        <div class="faq-a">Pro and Premium run on a <strong>30-day demo period</strong>. Days left appear above the plans. You do <strong>not</strong> need to wait 30 days to change — switch or downgrade anytime (Free / Pro / Premium). When the period ends, you return to Free automatically.</div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-q" onclick="toggleFaq(this)">Is this real money? <i class="fa-solid fa-plus"></i></button>
+        <div class="faq-a">No. FinTrack uses a demo wallet stored in your browser. New accounts start with $25 demo credits. Add $10 anytime from Pricing or the sidebar. No card is charged.</div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-q" onclick="toggleFaq(this)">What do I unlock when I upgrade? <i class="fa-solid fa-plus"></i></button>
+        <div class="faq-a">Free includes up to 5 transactions, budgets, and 1 goal. Pro unlocks unlimited transactions &amp; goals, Overview insights, Reports, and CSV export. Premium includes everything in Pro, plus Net Worth and Subscriptions.</div>
+      </div>
+
+      <div class="faq-item">
         <button class="faq-q" onclick="toggleFaq(this)">Is my financial data safe? <i class="fa-solid fa-plus"></i></button>
-        <div class="faq-a">This is a demo project — all of your data is stored locally in your own browser using localStorage. Nothing is sent to a server, so your information never leaves your device.</div>
-      </div>
-
-      <div class="faq-item">
-        <button class="faq-q" onclick="toggleFaq(this)">Do I really get charged? <i class="fa-solid fa-plus"></i></button>
-        <div class="faq-a">No. The plans illustrate how a real product might be tiered. Every plan opens the same local dashboard, and no payment is collected anywhere in this demo.</div>
-      </div>
-
-      <div class="faq-item">
-        <button class="faq-q" onclick="toggleFaq(this)">Can I change plans later? <i class="fa-solid fa-plus"></i></button>
-        <div class="faq-a">In a production version, yes — you could upgrade or downgrade at any time. Here, simply create an account to explore the full dashboard.</div>
+        <div class="faq-a">Yes for this demo — data stays in your browser via localStorage. Nothing is sent to a FinTrack server.</div>
       </div>
 
       <div class="faq-item">
         <button class="faq-q" onclick="toggleFaq(this)">What happens after I sign up? <i class="fa-solid fa-plus"></i></button>
-        <div class="faq-a">You answer a short five-step questionnaire about your income, spending, and goals. We use those answers to instantly populate your dashboard charts so it feels personal from day one.</div>
+        <div class="faq-a">You complete a short onboarding questionnaire, land on Overview, and can upgrade anytime with demo credits on this page.</div>
       </div>
     </div>
   </section>
@@ -182,14 +194,198 @@
     </div>
   </footer>
 
+  <script src="../js/storage.js?v=16"></script>
+  <script src="../js/ui.js?v=14"></script>
+  <script src="../js/plans.js?v=7"></script>
+  <script src="../js/loader.js?v=14"></script>
+  <script src="../js/nav.js?v=8"></script>
   <script>
     function toggleFaq(btn) {
       btn.parentElement.classList.toggle('open');
     }
+
+    function syncPricingHero() {
+      const user = typeof currentUser === 'function' ? currentUser() : null;
+      const plan = user && typeof getUserPlan === 'function' ? getUserPlan() : null;
+      const tag = document.getElementById('pricingHeroTag');
+      const title = document.getElementById('pricingHeroTitle');
+      const sub = document.getElementById('pricingHeroSub');
+      if (!tag || !title || !sub) return;
+
+      if (!user) {
+        tag.textContent = 'Demo Wallet Billing';
+        title.innerHTML = 'Upgrade with <span>demo credits</span> — no real card needed.';
+        sub.textContent = 'Start on Free. Use your demo wallet to unlock Pro or Premium. Paid plans last 30 days in this demo, and you can switch anytime.';
+        return;
+      }
+
+      if (plan === 'premium') {
+        tag.textContent = 'Your Current Plan';
+        title.innerHTML = 'You’re on <span>Premium</span> — full access unlocked.';
+        sub.textContent = 'Manage your demo plan below. See days left, top up credits, or switch to Pro/Free anytime — no need to wait out the 30-day period.';
+        return;
+      }
+
+      if (plan === 'pro') {
+        tag.textContent = 'Your Current Plan';
+        title.innerHTML = 'You’re on <span>Pro</span> — upgrade only if you need more.';
+        sub.textContent = 'Premium adds Net Worth and Subscriptions. You can also switch back to Free anytime. Paid plans show days left on a 30-day demo period.';
+        return;
+      }
+
+      tag.textContent = 'Demo Wallet Billing';
+      title.innerHTML = 'Upgrade with <span>demo credits</span> — no real card needed.';
+      sub.textContent = 'You’re on Free. Unlock Pro or Premium with demo credits. Each paid plan lasts 30 days, and you can change plans anytime.';
+    }
+
+    function syncPricingCards() {
+      const user = typeof currentUser === 'function' ? currentUser() : null;
+      const plan = user && typeof getUserPlan === 'function' ? getUserPlan() : null;
+
+      document.querySelectorAll('[data-plan-card]').forEach((card) => {
+        const id = card.dataset.planCard;
+        const badge = card.querySelector('.price-badge');
+        const btn = card.querySelector('button');
+        const isCurrent = Boolean(plan && id === plan);
+        // Only the active plan is highlighted when logged in.
+        // Guests still see Pro as the recommended (featured) option.
+        const featured = !user && id === 'pro';
+
+        card.classList.toggle('is-current', isCurrent);
+        card.classList.toggle('featured', featured);
+
+        if (badge) {
+          badge.textContent = isCurrent ? 'Current Plan' : (card.dataset.badge || '');
+        }
+        if (!btn) return;
+
+        btn.disabled = false;
+        btn.classList.remove('is-current-btn');
+
+        if (isCurrent) {
+          btn.textContent = `You're on ${planLabel(id)}`;
+          btn.disabled = true;
+          btn.className = 'btn-fill-block is-current-btn';
+          return;
+        }
+
+        // Non-current plans stay outline so only the selected plan looks lit
+        if (id === 'free') {
+          btn.className = 'btn-outline-block';
+          if (!user) btn.textContent = 'Continue Free';
+          else btn.textContent = 'Switch to Free';
+          return;
+        }
+
+        if (id === 'pro') {
+          btn.className = 'btn-outline-block';
+          if (plan === 'premium') btn.textContent = 'Switch to Pro';
+          else if (!user) {
+            btn.className = 'btn-fill-block';
+            btn.textContent = 'Buy Pro with demo wallet';
+          } else {
+            btn.textContent = 'Buy Pro with demo wallet';
+          }
+          return;
+        }
+
+        if (id === 'premium') {
+          btn.className = 'btn-outline-block';
+          btn.textContent = 'Buy Premium with demo wallet';
+        }
+      });
+    }
+
+    function refreshPricingWallet() {
+      if (typeof ensurePlanPeriod === 'function') ensurePlanPeriod();
+
+      const text = document.getElementById('pricingWalletText');
+      const meta = document.getElementById('pricingWalletMeta');
+      const actions = document.getElementById('pricingWalletActions');
+      const user = typeof currentUser === 'function' ? currentUser() : null;
+      if (!text || !actions) return;
+
+      syncPricingHero();
+
+      if (!user) {
+        text.innerHTML = 'Log in to buy Pro ($6) or Premium ($12) with demo credits. New accounts start with <strong>$25</strong>.';
+        if (meta) meta.textContent = '';
+        actions.innerHTML = `
+          <button class="btn-outline" type="button" onclick="location.href='login.html'">Login</button>
+          <button class="btn-gold" type="button" onclick="location.href='signup.html'">Sign Up</button>`;
+        syncPricingCards();
+        return;
+      }
+
+      text.innerHTML = `Logged in as <strong>${user.name || user.email}</strong><br>Plan: <strong>${planLabel(user.plan)}</strong> · Demo wallet: <strong>$${Number(user.demoWallet).toFixed(2)}</strong>`;
+      if (meta) {
+        meta.textContent = user.plan === 'free'
+          ? 'Free has no paid period. Upgrade anytime with demo credits.'
+          : (formatPlanExpiry(user) || `Paid plans last ${PLAN_PERIOD_DAYS} days. You can switch anytime.`);
+      }
+      actions.innerHTML = `
+        <button class="btn-outline" type="button" onclick="topUpFromPricing()">Add $10 demo funds</button>
+        <button class="btn-gold" type="button" onclick="location.href='dashboard.html'">Open Dashboard</button>`;
+      syncPricingCards();
+    }
+
+    function topUpFromPricing() {
+      const result = addDemoFunds(DEMO_TOPUP_AMOUNT);
+      if (!result.ok) {
+        showToast(result.error || 'Could not add funds.', 'fa-circle-exclamation');
+        return;
+      }
+      showToast(`Demo funds added. Balance: $${result.balance.toFixed(2)}`, 'fa-coins');
+      refreshPricingWallet();
+    }
+
+    async function changePlan(planId) {
+      const user = typeof currentUser === 'function' ? currentUser() : null;
+      if (!user) {
+        showToast('Log in first to change your plan.', 'fa-user-lock');
+        setTimeout(() => { location.href = 'login.html'; }, 700);
+        return;
+      }
+
+      showPlanSwitchOverlay('loading', planId);
+      await new Promise((r) => setTimeout(r, 900));
+
+      const result = switchPlan(planId);
+      if (!result.ok) {
+        hidePlanSwitchOverlay();
+        showToast(result.error || 'Could not change plan.', 'fa-circle-exclamation');
+        return;
+      }
+
+      showPlanSwitchOverlay('success', planId);
+      refreshPricingWallet();
+      if (typeof refreshNavPlanChip === 'function') refreshNavPlanChip();
+    }
+
+    document.getElementById('btnFreePlan')?.addEventListener('click', () => {
+      const user = typeof currentUser === 'function' ? currentUser() : null;
+      const plan = user && typeof getUserPlan === 'function' ? getUserPlan() : null;
+      if (!user) {
+        location.href = 'signup.html';
+        return;
+      }
+      if (plan === 'free') {
+        location.href = 'dashboard.html';
+        return;
+      }
+      changePlan('free');
+    });
+    document.getElementById('btnProPlan')?.addEventListener('click', () => {
+      if (document.getElementById('btnProPlan').disabled) return;
+      changePlan('pro');
+    });
+    document.getElementById('btnPremiumPlan')?.addEventListener('click', () => {
+      if (document.getElementById('btnPremiumPlan').disabled) return;
+      changePlan('premium');
+    });
+    refreshPricingWallet();
+    window.refreshPricingWallet = refreshPricingWallet;
+    window.syncPricingCards = syncPricingCards;
   </script>
-  <script src="../js/storage.js?v=7"></script>
-  <script src="../js/ui.js?v=7"></script>
-  <script src="../js/loader.js?v=8"></script>
-  <script src="../js/nav.js?v=8"></script>
 </body>
 </html>

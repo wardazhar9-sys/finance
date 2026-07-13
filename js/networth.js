@@ -2,6 +2,10 @@
 
 requireAuth();
 
+if (!hasPlanAtLeast('premium')) {
+  renderPlanGate('premium', 'Net Worth tracking');
+} else {
+
 const GRID = 'rgba(255,255,255,0.06)';
 const TICK = '#9FB3C8';
 let nwChart;
@@ -135,7 +139,7 @@ function renderChart(data) {
       plugins: { legend: { display: false } },
       scales: {
         x: { grid: { color: GRID }, ticks: { color: TICK } },
-        y: { beginAtZero: true, grid: { color: GRID }, ticks: { color: TICK, callback: (v) => chartMoneyTick(v) } },
+        y: { beginAtZero: true, grid: { color: GRID }, ticks: { color: TICK, callback: (v) => '$' + Number(v).toLocaleString('en-US') } },
       },
     },
   });
@@ -162,7 +166,7 @@ function renderTrend(data) {
       plugins: { legend: { labels: { color: TICK, usePointStyle: true, boxWidth: 8 } } },
       scales: {
         x: { grid: { color: GRID }, ticks: { color: TICK } },
-        y: { grid: { color: GRID }, ticks: { color: TICK, callback: (v) => chartMoneyTick(v) } },
+        y: { grid: { color: GRID }, ticks: { color: TICK, callback: (v) => '$' + Number(v).toLocaleString('en-US') } },
       },
     },
   });
@@ -215,4 +219,5 @@ bindFormInputClear([
   { field: 'liabilityValue', error: 'liabilityValueError' },
 ], 'liabilityFormError');
 render();
-bindCurrencyRefresh(render);
+
+} // premium gate

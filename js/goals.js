@@ -38,6 +38,29 @@ function resetGoalForm() {
   document.querySelectorAll('#goalCategoryChips .chip').forEach((c) => c.classList.remove('selected'));
   const first = document.querySelector('#goalCategoryChips .chip[data-value="emergency"]');
   if (first) selectGoalCategory(first);
+  syncGoalUpgradeUi();
+}
+
+function freeGoalLimitReached() {
+  return !editingGoalId && typeof hasPlanAtLeast === 'function' && !hasPlanAtLeast('pro') && getData().goals.length >= 1;
+}
+
+function promptGoalUpgrade() {
+  showToast('Free plan limit reached: 1 savings goal. Upgrade to Pro for unlimited goals.', 'fa-crown');
+}
+
+function syncGoalUpgradeUi() {
+  const btn = document.getElementById('goalSubmitBtn');
+  if (!btn) return;
+
+  if (editingGoalId || (typeof hasPlanAtLeast === 'function' && hasPlanAtLeast('pro'))) {
+    btn.removeAttribute('data-plan');
+    btn.querySelectorAll('.plan-corner-badge').forEach((b) => b.remove());
+    btn.classList.remove('plan-badge-host');
+  } else {
+    btn.setAttribute('data-plan', 'pro');
+  }
+  if (typeof applyPlanBadges === 'function') applyPlanBadges();
 }
 
 function validateGoalForm() {
@@ -88,6 +111,12 @@ function addGoal(e) {
   e.preventDefault();
   if (!validateGoalForm()) return;
 
+  const data = getData();
+  if (freeGoalLimitReached()) {
+    promptGoalUpgrade();
+    return;
+  }
+
   const customName = document.getElementById('goalName').value.trim();
   const meta = goalMeta(selectedGoalCategory);
   const name = customName || (selectedGoalCategory === 'custom' ? '' : meta.label);
@@ -98,7 +127,6 @@ function addGoal(e) {
   const monthlyContribution = parseFormAmount(document.getElementById('goalMonthly').value) || 0;
   const note = document.getElementById('goalNote').value.trim();
 
-  const data = getData();
   const goalPayload = {
     name,
     category: selectedGoalCategory,
@@ -149,6 +177,7 @@ function editGoal(id) {
     c.classList.toggle('selected', c.dataset.value === g.category);
   });
   selectedGoalCategory = g.category;
+  syncGoalUpgradeUi();
   document.getElementById('goalForm').scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
@@ -312,7 +341,15 @@ function render() {
   renderKPIs(data);
   renderCards(data);
   applyAlertFocusFromSession();
+  syncGoalUpgradeUi();
 }
+
+document.getElementById('goalSubmitBtn')?.addEventListener('click', (e) => {
+  if (freeGoalLimitReached()) {
+    e.preventDefault();
+    promptGoalUpgrade();
+  }
+});
 
 resetGoalForm();
 bindFormInputClear([
@@ -324,4 +361,3 @@ bindFormInputClear([
   { field: 'goalNote', error: 'goalNoteError' },
 ], 'goalFormError');
 render();
-bindCurrencyRefresh(render);
