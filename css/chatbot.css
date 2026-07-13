@@ -509,4 +509,10 @@
     width: calc(100vw - 28px);
     height: min(74vh, 580px);
   }
+
+  .ft-chat-toggle {
+    width: 52px;
+    height: 52px;
+    border-radius: 16px;
+  }
 }

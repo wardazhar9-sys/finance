@@ -1053,7 +1053,7 @@
     if (document.querySelector('link[data-fintrack-chatbot]')) return;
     const link = document.createElement('link');
     link.rel = 'stylesheet';
-    link.href = rootPath('css/chatbot.css?v=5');
+    link.href = rootPath('css/chatbot.css?v=6');
     link.dataset.fintrackChatbot = '1';
     document.head.appendChild(link);
   }

@@ -532,6 +532,32 @@ a { text-decoration: none; color: inherit; }
   .footer-bottom { flex-direction: column; gap: 12px; text-align: center; }
 }
 
+/* Phones: single-column footer, wrap long lines */
+@media (max-width: 640px) {
+  .footer {
+    padding: 36px 16px 24px;
+    overflow-x: clip;
+  }
+  .footer-grid {
+    grid-template-columns: 1fr;
+    gap: 28px;
+  }
+  .footer-col p,
+  .footer-col a {
+    overflow-wrap: anywhere;
+    word-break: break-word;
+  }
+  .footer-bottom {
+    align-items: center;
+  }
+  .footer-bottom p,
+  .footer-bottom {
+    overflow-wrap: anywhere;
+    word-break: break-word;
+    max-width: 100%;
+  }
+}
+
 /* ===== "Coming soon" badge ===== */
 .soon-badge {
   display: inline-block;

@@ -534,7 +534,12 @@ def test_dashboard_form_validation():
     assert_('ensureMobileNavChrome' in app_nav and 'side-nav-toggle' in app_nav, 'app-nav mobile menu toggle')
     assert_('side-footer' in app_nav, 'app-nav groups currency + logout in footer')
     dash_css = (ROOT / 'css/dashboard.css').read_text()
-    assert_('sidebar.is-open' in dash_css and '@media (max-width: 900px)' in dash_css, 'dashboard drawer responsive CSS')
+    assert_('sidebar.is-open' in dash_css and 'min-width: 641px' in dash_css and '@media (max-width: 640px)' in dash_css, 'dashboard tablet/phone drawer breakpoints')
+    assert_('.panel.inbox-panel' in dash_css and 'grid-template-columns: 1fr' in dash_css, 'inbox panel can collapse to one column')
+    landing = (ROOT / 'css/landing.css').read_text()
+    assert_('@media (max-width: 650px)' in landing and 'flex-direction: column' in landing, 'landing stacks hero actions on phone')
+    styles = (ROOT / 'css/styles.css').read_text()
+    assert_('grid-template-columns: 1fr' in styles.split('@media (max-width: 640px)')[1], 'footer stacks to one column on phone')
     cur_css = (ROOT / 'css/currency.css').read_text()
     assert_('.side-currency .currency-select-trigger' in cur_css, 'currency CSS sizes sidebar trigger')
 

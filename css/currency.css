@@ -248,37 +248,74 @@
   font-weight: 500;
 }
 
-/* Mobile / tablet drawer — balanced currency block */
-@media (max-width: 900px) {
-  .side-currency {
-    width: 100%;
-  }
+/* Tablet drawer: normal-scale currency controls */
+@media (max-width: 900px) and (min-width: 641px) {
+  .side-currency { width: 100%; }
 
   .side-currency .currency-select-trigger {
-    min-height: 44px;
-    padding: 11px 12px;
-    font-size: 13px;
+    min-height: 40px;
+    padding: 9px 11px;
+    font-size: 12.5px;
   }
 
   .side-currency .currency-select-panel {
-    max-height: min(260px, 38vh);
+    max-height: min(280px, 42vh);
+  }
+}
+
+/* Phones only */
+@media (max-width: 640px) {
+  .side-currency {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .side-currency .currency-select,
+  .side-currency #currencySelectMount {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .side-currency .currency-select-trigger {
+    min-height: 42px;
+    padding: 10px 11px;
+    font-size: 12.5px;
+  }
+
+  .side-currency .currency-select-value { min-width: 0; }
+
+  .side-currency .currency-select-text {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 100%;
+  }
+
+  .side-currency .currency-select-panel {
+    max-height: min(240px, 36vh);
     left: 0;
     right: 0;
     width: 100%;
   }
 
   .side-currency .currency-select-option {
-    min-height: 42px;
-    padding: 11px 12px;
+    min-height: 40px;
+    padding: 10px 11px;
+    gap: 8px;
   }
+
+  .side-currency .currency-option-label { font-size: 12.5px; }
+  .side-currency .currency-option-code { font-size: 11px; }
 }
 
 @media (max-width: 420px) {
   .side-currency-label {
-    margin-bottom: 7px;
+    margin-bottom: 6px;
+    font-size: 10px;
   }
 
   .side-currency .currency-select-trigger {
-    min-height: 42px;
+    min-height: 40px;
+    font-size: 12px;
   }
 }

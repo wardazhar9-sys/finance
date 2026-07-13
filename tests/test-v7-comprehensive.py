@@ -275,7 +275,12 @@ def test_source_gates():
     ok("ensureMobileNavChrome" in nav and "side-nav-toggle" in nav, "sidebar mobile drawer chrome")
     ok("side-footer" in nav and "side-brand" in nav, "sidebar brand/footer layout")
     ok("side-nav-toggle" in dash_css and "sidebar.is-open" in dash_css, "drawer open styles")
-    ok("@media (max-width: 900px)" in dash_css, "tablet/mobile sidebar breakpoint")
+    ok("min-width: 641px" in dash_css and "@media (max-width: 640px)" in dash_css, "tablet vs phone sidebar breakpoints")
+    ok(".panel.inbox-panel" in dash_css, "inbox panel specificity selector present")
+    land = read("css/landing.css")
+    ok("@media (max-width: 650px)" in land and "hero-buttons" in land, "landing phone hero rules")
+    foot = read("css/styles.css")
+    ok("@media (max-width: 640px)" in foot and "footer-grid" in foot, "footer phone stack rules")
 
     ok("currency: ''" in storage or "profile.currency" in storage, "storage profile.currency")
     ok("getUserCurrency" in read("js/storage.js") or "formatMoney" in read("js/currency-data.js"), "currency helpers present")

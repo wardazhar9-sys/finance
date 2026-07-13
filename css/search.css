@@ -9,6 +9,20 @@
   width: 100%;
   max-width: 420px;
   font-family: inherit;
+  min-width: 0;
+}
+
+@media (max-width: 900px) and (min-width: 641px) {
+  .fsearch { max-width: 100%; }
+}
+
+@media (max-width: 640px) {
+  .fsearch { max-width: 100%; }
+  .fsearch-item-title,
+  .fsearch-item-sub {
+    overflow-wrap: anywhere;
+    white-space: normal;
+  }
 }
 
 /* Visually hidden but screen-reader accessible */
