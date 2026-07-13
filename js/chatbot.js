@@ -1305,7 +1305,7 @@
 
       addMessage(result.text, 'bot', { meta, actions: result.actions || [] });
 
-      if (result.mode !== 'guardrail') {
+      if (result.mode === 'local' || result.mode === 'ai' || result.mode === 'local-fallback' || result.mode === 'ai-routed-local') {
         helpfulCount += 1;
         saveMeta({ helpfulCount });
         maybeLeadCapture();
