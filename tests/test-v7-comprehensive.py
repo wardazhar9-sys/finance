@@ -273,6 +273,8 @@ def test_source_gates():
     ok("is-pro" in nav and "Subscriptions" in nav, "sidebar Pro tags + Subscriptions label")
     ok("currencySelectMount" in nav and "mountSidebarCurrencySelect" in nav, "sidebar currency picker")
     ok("ensureMobileNavChrome" in nav and "side-nav-toggle" in nav, "sidebar mobile drawer chrome")
+    ok("mobileAppBar" in nav and "hamburger-line" in nav, "phone top-right hamburger chrome")
+    ok("mobile-app-bar" in dash_css and "translateX(105%)" in dash_css, "phone right drawer + app bar CSS")
     ok("side-footer" in nav and "side-brand" in nav, "sidebar brand/footer layout")
     ok("side-nav-toggle" in dash_css and "sidebar.is-open" in dash_css, "drawer open styles")
     ok("min-width: 641px" in dash_css and "@media (max-width: 640px)" in dash_css, "tablet vs phone sidebar breakpoints")

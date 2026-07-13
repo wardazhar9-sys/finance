@@ -1,6 +1,6 @@
 /* app-nav.js — shared sidebar for all authenticated app pages */
 
-const APP_NAV_VERSION = 16;
+const APP_NAV_VERSION = 17;
 
 const APP_NAV_LINKS = [
   { page: 'dashboard', href: 'dashboard.html', icon: 'fa-gauge-high', label: 'Overview' },
@@ -17,10 +17,19 @@ function isMobileNavViewport() {
   return window.matchMedia('(max-width: 900px)').matches;
 }
 
+function isPhoneNavViewport() {
+  return window.matchMedia('(max-width: 640px)').matches;
+}
+
+function syncPhoneNavMode() {
+  document.body.classList.toggle('phone-nav', isPhoneNavViewport());
+}
+
 function setSidebarOpen(open) {
   const sidebar = document.getElementById('appSidebar');
   const backdrop = document.getElementById('sideNavBackdrop');
   const toggle = document.getElementById('sideNavToggle');
+  const barToggle = document.getElementById('mobileNavToggle');
   if (!sidebar) return;
 
   sidebar.classList.toggle('is-open', open);
@@ -30,12 +39,15 @@ function setSidebarOpen(open) {
     backdrop.hidden = !open;
     backdrop.setAttribute('aria-hidden', open ? 'false' : 'true');
   }
-  if (toggle) {
-    toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
-    toggle.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
-    const icon = toggle.querySelector('i');
+
+  [toggle, barToggle].forEach((btn) => {
+    if (!btn) return;
+    btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+    btn.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
+    btn.classList.toggle('is-open', open);
+    const icon = btn.querySelector('i.fa-bars, i.fa-xmark');
     if (icon) icon.className = open ? 'fa-solid fa-xmark' : 'fa-solid fa-bars';
-  }
+  });
 }
 
 function closeSidebarNav() {
@@ -50,6 +62,7 @@ function toggleSidebarNav() {
 
 function ensureMobileNavChrome() {
   if (!document.getElementById('appSidebar')) return;
+  syncPhoneNavMode();
 
   let backdrop = document.getElementById('sideNavBackdrop');
   if (!backdrop) {
@@ -62,6 +75,7 @@ function ensureMobileNavChrome() {
     document.body.appendChild(backdrop);
   }
 
+  /* Tablet / legacy floating toggle (left) — hidden on phones via CSS */
   let toggle = document.getElementById('sideNavToggle');
   if (!toggle) {
     toggle = document.createElement('button');
@@ -74,6 +88,28 @@ function ensureMobileNavChrome() {
     toggle.innerHTML = '<i class="fa-solid fa-bars" aria-hidden="true"></i>';
     toggle.addEventListener('click', toggleSidebarNav);
     document.body.appendChild(toggle);
+  }
+
+  /* Phone-only top bar with three-line hamburger on the right */
+  let appBar = document.getElementById('mobileAppBar');
+  if (!appBar) {
+    appBar = document.createElement('header');
+    appBar.id = 'mobileAppBar';
+    appBar.className = 'mobile-app-bar';
+    appBar.innerHTML = `
+      <button type="button" class="mobile-app-brand" onclick="location.href='../index.html'" aria-label="FinTrack home">
+        <span class="logo-icon"><i class="fa-solid fa-chart-line" aria-hidden="true"></i></span>
+        <span class="logo-text">Fin<span>Track</span></span>
+      </button>
+      <button type="button" id="mobileNavToggle" class="mobile-nav-toggle" aria-controls="appSidebar" aria-expanded="false" aria-label="Open menu">
+        <span class="hamburger" aria-hidden="true">
+          <span class="hamburger-line"></span>
+          <span class="hamburger-line"></span>
+          <span class="hamburger-line"></span>
+        </span>
+      </button>`;
+    document.body.appendChild(appBar);
+    document.getElementById('mobileNavToggle').addEventListener('click', toggleSidebarNav);
   }
 }
 
@@ -114,6 +150,7 @@ function renderAppNav(activePage) {
         <i class="fa-solid fa-xmark" aria-hidden="true"></i>
       </button>
     </div>
+    <p class="side-nav-caption">Navigate</p>
     <div class="side-plan">
       <div class="side-plan-row">
         <span class="side-plan-badge">${plan}</span>
@@ -124,7 +161,7 @@ function renderAppNav(activePage) {
         <button type="button" class="side-plan-btn ghost" onclick="topUpDemoWallet()">Add $10</button>
       </div>
     </div>
-    <nav class="side-nav">${links}</nav>
+    <nav class="side-nav" aria-label="App pages">${links}</nav>
     <div class="side-footer">
       <div class="side-currency">
         <div class="side-currency-label"><i class="fa-solid fa-coins"></i> Currency</div>
@@ -170,7 +207,10 @@ function initAppNav() {
   const el = document.getElementById('appSidebar');
   if (!el) return;
   const version = String(APP_NAV_VERSION);
-  if (el.dataset.navInit === '1' && el.dataset.navVersion === version) return;
+  if (el.dataset.navInit === '1' && el.dataset.navVersion === version) {
+    syncPhoneNavMode();
+    return;
+  }
   el.dataset.navInit = '1';
   el.dataset.navVersion = version;
   el.setAttribute('aria-label', 'App navigation');
@@ -191,6 +231,7 @@ document.addEventListener('keydown', (e) => {
 });
 
 window.addEventListener('resize', () => {
+  syncPhoneNavMode();
   if (!isMobileNavViewport()) closeSidebarNav();
 });
 
