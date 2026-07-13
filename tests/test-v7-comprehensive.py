@@ -281,6 +281,8 @@ def test_source_gates():
     ok(".panel.inbox-panel" in dash_css, "inbox panel specificity selector present")
     land = read("css/landing.css")
     ok("@media (max-width: 650px)" in land and "hero-buttons" in land, "landing phone hero rules")
+    ok("marketing-nav-toggle" in land and "marketing-nav-open" in land, "landing phone hamburger styles")
+    ok("ensureMarketingMobileNav" in read("js/nav.js") and "marketingNavToggle" in read("js/nav.js"), "nav.js phone hamburger")
     foot = read("css/styles.css")
     ok("@media (max-width: 640px)" in foot and "footer-grid" in foot, "footer phone stack rules")
 
