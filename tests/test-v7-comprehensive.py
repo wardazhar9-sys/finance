@@ -281,8 +281,12 @@ def test_source_gates():
     onboard = read("js/onboarding.js")
     ok("TOTAL_STEPS = 6" in onboard and "initCurrencyStep" in onboard, "onboarding currency step")
     ok("localDateStr" in onboard, "onboarding uses localDateStr for seed dates")
+    ok("answers.income" in onboard and "type: 'income'" in onboard, "onboarding seeds income transaction")
+    ok("Math.round(amt * 1.15)" in onboard, "onboarding seeds budgets at 115%")
+    ok("normalizeGoal" in onboard, "onboarding seeds a savings goal")
     ok('id="dashSearch"' in read("pages/dashboard.html"), "dashboard search mount present")
     ok((ROOT / "js/currency.js").exists() and (ROOT / "js/search.js").exists(), "currency + search assets present")
+    ok("buildSearchIndex" in dash and "FinSearch.mount" in dash, "dashboard mounts FinSearch with index")
 
     ok("syncPricingCards" in pricing and "is-current" in pricing, "Pricing highlights current plan")
     ok("Switch to Free" in pricing or "changePlan('free')" in pricing, "Pricing allows downgrade")
@@ -290,12 +294,15 @@ def test_source_gates():
     ok("featured = !user && id === 'pro'" in pricing or "featured = !user && id === 'pro'" in pricing.replace(" ", ""),
        "Only guests feature Pro; logged-in highlights current only")
 
-    # Chatbot plan awareness
+    # Chatbot plan awareness + currency/search + 6-step onboarding
     ok("up to 5 transactions" in chatbot.lower() or "Up to 5 transactions" in chatbot, "chatbot Free tx limit")
     ok("1 savings goal" in chatbot or "1 goal" in chatbot.lower(), "chatbot Free goal limit")
     ok("$6" in chatbot and "$12" in chatbot, "chatbot Pro/Premium prices")
     ok("Premium-only" in chatbot or "Premium only" in chatbot or "premium-only" in chatbot.lower(), "chatbot Premium-only pages")
     ok("demo wallet" in chatbot.lower() or "demo credits" in chatbot.lower(), "chatbot demo wallet")
+    ok("6-step" in chatbot or "6 step" in chatbot.lower(), "chatbot describes 6-step onboarding")
+    ok("display currency" in chatbot.lower() or "currency" in chatbot.lower(), "chatbot knows currency support")
+    ok("search" in chatbot.lower() and ("live search" in chatbot.lower() or "search bar" in chatbot.lower()), "chatbot knows dashboard search")
     ok("coming soon" not in chatbot.lower() or chatbot.lower().count("coming soon") <= 1, "chatbot not stuck on coming-soon payments")
 
 
@@ -397,7 +404,17 @@ def test_plans_browser_runtime():
 
     ok(not data.get("errors"), "harness no runtime errors", str(data.get("errors")))
     cases = data.get("cases") or []
-    ok(len(cases) >= 20, f"harness ran {len(cases)} assertions")
+    ok(len(cases) >= 40, f"harness ran {len(cases)} assertions")
+    names = {c.get("name") for c in cases}
+    for required in (
+        "dash_kpi_income_5000",
+        "dash_kpi_expenses_2100",
+        "seed_currency_gbp",
+        "form_tx_expense_updates_kpi",
+        "search_hits_food",
+        "currency_set_eur",
+    ):
+        ok(required in names, f"harness includes {required}")
     for c in cases:
         ok(bool(c.get("pass")), f"runtime:{c.get('name')}", c.get("detail") or "")
 
@@ -451,6 +468,12 @@ async function ask(f,text){{
     results.cases.push({{name:'csv_pro',pass:/Pro|Premium|CSV|export|upgrade/i.test(csv),sample:csv.slice(0,240)}});
     const off=await ask(home,'what my wife name');
     results.cases.push({{name:'offtopic',pass:/don.?t have that information|not sure|can.?t help with that/i.test(off)&&!/vanilla JavaScript/i.test(off),sample:off.slice(0,180)}});
+    const onboard=await ask(home,'How many onboarding steps are there?');
+    results.cases.push({{name:'onboarding_steps',pass:/6-step|6 step|Step 1:.*currency|display currency/i.test(onboard),sample:onboard.slice(0,260)}});
+    const currency=await ask(home,'How do I change currency?');
+    results.cases.push({{name:'currency_help',pass:/currency|sidebar|ISO|display/i.test(currency),sample:currency.slice(0,240)}});
+    const search=await ask(home,'Does the dashboard have search?');
+    results.cases.push({{name:'search_help',pass:/search|Overview|live search|transactions|goals|budgets/i.test(search),sample:search.slice(0,240)}});
     const pricingPage=await openPage('/pages/pricing.html');
     const doc=pricingPage.contentDocument;
     results.cases.push({{name:'pricing_chat',pass:!!doc.getElementById('ft-chat-root')}});

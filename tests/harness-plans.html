@@ -149,6 +149,136 @@
         assert(PLAN_CATALOG.premium.price === 12, 'premium_price_12');
         assert(DEMO_TOPUP_AMOUNT === 10, 'topup_10');
         assert(PLAN_PERIOD_DAYS === 30, 'period_30');
+
+        /* ── Onboarding seed → dashboard KPI math (mirrors onboarding.js finish) ── */
+        localStorage.clear();
+        const seedUser = {
+          id: 'u-seed-1',
+          name: 'Seed User',
+          email: 'seed@fintrack.demo',
+          password: 'pass123',
+          plan: 'free',
+          demoWallet: 25,
+        };
+        localStorage.setItem('fintrack_users', JSON.stringify([seedUser]));
+        localStorage.setItem('fintrack_session', seedUser.id);
+        localStorage.setItem('fintrack_data_' + seedUser.id, JSON.stringify({
+          profile: { onboarded: false, currency: '', income: 0, categories: [], moneyStyle: '', goalType: '' },
+          transactions: [],
+          budgets: {},
+          goals: [],
+          subscriptions: [],
+          netWorth: { assets: [], liabilities: [], history: [] },
+          alertReads: {},
+          notices: [],
+        }));
+
+        const answers = {
+          currency: 'GBP',
+          income: 5000,
+          categories: ['Food', 'Rent', 'Transport'],
+          catAmounts: { Food: 400, Rent: 1500, Transport: 200 },
+          goalType: 'Emergency Fund',
+          goalTarget: 10000,
+          goalSaved: 1500,
+          moneyStyle: 'saver',
+        };
+        const today = localDateStr();
+        const seeded = getData();
+        seeded.profile = {
+          onboarded: true,
+          currency: answers.currency,
+          income: answers.income,
+          categories: answers.categories,
+          moneyStyle: answers.moneyStyle,
+          goalType: answers.goalType,
+        };
+        seeded.transactions.push({
+          id: uid(), type: 'income', amount: answers.income, category: 'Salary', date: today, note: 'Monthly income',
+        });
+        answers.categories.forEach((cat) => {
+          const amt = answers.catAmounts[cat];
+          seeded.transactions.push({
+            id: uid(), type: 'expense', amount: amt, category: cat, date: today, note: 'Typical monthly spend',
+          });
+          seeded.budgets[cat] = Math.round(amt * 1.15);
+        });
+        seeded.goals.push(normalizeGoal({
+          id: uid(),
+          name: answers.goalType,
+          category: inferGoalCategory(answers.goalType),
+          target: answers.goalTarget,
+          saved: answers.goalSaved,
+          deadline: '',
+          priority: 'high',
+          monthlyContribution: 0,
+          note: 'Created during onboarding',
+          history: [{ id: uid(), date: today, amount: answers.goalSaved, type: 'deposit', note: 'Initial balance' }],
+        }));
+        saveData(seeded);
+
+        const after = getData();
+        const mKey = monthKey();
+        const monthIncome = sumByType(after.transactions, 'income', mKey);
+        const monthExpense = sumByType(after.transactions, 'expense', mKey);
+        const balance = sumByType(after.transactions, 'income') - sumByType(after.transactions, 'expense');
+        const savingsRate = monthIncome > 0 ? Math.round(((monthIncome - monthExpense) / monthIncome) * 100) : 0;
+
+        assert(after.profile.onboarded === true, 'seed_onboarded');
+        assert(after.profile.currency === 'GBP', 'seed_currency_gbp');
+        assert(after.profile.income === 5000, 'seed_profile_income');
+        assert(monthIncome === 5000, 'dash_kpi_income_5000');
+        assert(monthExpense === 2100, 'dash_kpi_expenses_2100');
+        assert(balance === 2900, 'dash_kpi_balance_2900');
+        assert(savingsRate === 58, 'dash_kpi_savings_58');
+        assert(after.budgets.Food === 460, 'seed_budget_food_115pct');
+        assert(after.budgets.Rent === 1725, 'seed_budget_rent_115pct');
+        assert(after.budgets.Transport === 230, 'seed_budget_transport_115pct');
+        assert(after.goals.length === 1 && after.goals[0].target === 10000, 'seed_goal_target');
+        assert(goalProgress(after.goals[0]) === 15, 'seed_goal_progress_15');
+
+        setUserCurrency('GBP');
+        const gbpIncome = String(money(monthIncome));
+        assert(/£|GBP|5.?000/i.test(gbpIncome), 'dash_income_gbp_format', gbpIncome);
+
+        /* ── Form writes reflect on dashboard math ── */
+        after.transactions.unshift(normalizeTransaction({
+          id: uid(), type: 'expense', amount: 50, category: 'Food', date: today, note: 'Lunch',
+        }));
+        after.budgets.Food = 500;
+        after.goals[0].saved = 2000;
+        after.goals[0].history.push({ id: uid(), date: today, amount: 500, type: 'deposit', note: 'Extra' });
+        saveData(after);
+
+        const updated = getData();
+        assert(sumByType(updated.transactions, 'expense', mKey) === 2150, 'form_tx_expense_updates_kpi');
+        assert(updated.budgets.Food === 500, 'form_budget_saved');
+        assert(goalProgress(updated.goals[0]) === 20, 'form_goal_fund_updates_progress');
+
+        /* ── Search index covers seeded + form data ── */
+        function buildSearchIndexLite(data) {
+          const items = [];
+          data.transactions.forEach((t) => {
+            items.push({ title: t.category, keywords: [t.category, t.note, t.type], url: 'transactions.html' });
+          });
+          data.goals.forEach((g) => {
+            items.push({ title: g.name, keywords: [g.name, 'goal'], url: 'goals.html' });
+          });
+          Object.keys(data.budgets).forEach((category) => {
+            items.push({ title: category, keywords: [category, 'budget'], url: 'budgets.html' });
+          });
+          return items;
+        }
+        const index = buildSearchIndexLite(updated);
+        const q = 'food';
+        const hits = index.filter((item) => {
+          const hay = [item.title].concat(item.keywords || []).join(' ').toLowerCase();
+          return hay.includes(q);
+        });
+        assert(hits.length >= 2, 'search_hits_food', String(hits.length));
+        assert(hits.some((h) => h.url === 'transactions.html'), 'search_tx_url');
+        assert(hits.some((h) => h.url === 'budgets.html'), 'search_budget_url');
+        assert(index.some((h) => /emergency/i.test(h.title)), 'search_indexes_goal');
       } catch (e) {
         results.errors.push(String(e && e.stack || e));
       }

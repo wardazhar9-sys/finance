@@ -307,6 +307,10 @@ def main():
     ok("currencySelectMount" in (ROOT / "js/app-nav.js").read_text(), "app-nav mounts currency select")
     onboarding = page_html.get("/pages/onboarding.html", "")
     ok("of 6" in onboarding and "currencySelectMount" in onboarding, "onboarding has currency step (6 steps)")
+    chat_src = (ROOT / "js/chatbot.js").read_text(encoding="utf-8")
+    ok("6-step" in chat_src, "chatbot documents 6-step onboarding")
+    ok("id: 'currency'" in chat_src or "display currency" in chat_src.lower(), "chatbot has currency knowledge")
+    ok("id: 'search'" in chat_src or "live search" in chat_src.lower(), "chatbot has search knowledge")
     ok("storage.js" in dash or "loader.js" in dash, "dashboard loads storage via page/loader")
     ok("chatbot" not in dash.lower() or True, "dashboard still valid with chatbot via loader")
 

@@ -486,12 +486,36 @@ def test_dashboard_form_validation():
     assert_('initCurrencyStep' in onboarding, 'onboarding initializes currency step')
     assert_('localDateStr' in onboarding, 'onboarding seeds dates with localDateStr')
     assert_('profile.onboarded' in onboarding, 'onboarding guards already-onboarded users')
+    assert_("type: 'income'" in onboarding and 'Salary' in onboarding, 'onboarding seeds Salary income for dashboard KPI')
+    assert_('Math.round(amt * 1.15)' in onboarding, 'onboarding seeds budgets at 115% of spend')
+    assert_('normalizeGoal' in onboarding, 'onboarding creates a goal from wizard answers')
+    assert_("textContent = n === TOTAL_STEPS ? 'Finish' : 'Continue'" in onboarding
+            or "n === TOTAL_STEPS ? 'Finish' : 'Continue'" in onboarding,
+            'Continue becomes Finish on last step')
 
     onboarding_html = (ROOT / 'pages/onboarding.html').read_text()
     assert_(re.search(r'auth\.css\?v=\d+', onboarding_html), 'Onboarding loads versioned auth.css')
     assert_(re.search(r'onboarding\.js\?v=\d+', onboarding_html), 'Onboarding loads versioned onboarding.js')
     assert_('currencySelectMount' in onboarding_html, 'Onboarding has currency picker mount')
     assert_('of 6' in onboarding_html, 'Onboarding HTML shows 6 steps')
+    assert_('id="nextBtn"' in onboarding_html and 'Continue' in onboarding_html, 'Onboarding has Continue button')
+
+    dash_js = (ROOT / 'js/dashboard.js').read_text()
+    assert_('sumByType(tx, \'income\'' in dash_js or "sumByType(tx, 'income'" in dash_js, 'dashboard income KPI from transactions')
+    assert_('kpiIncome' in dash_js and 'kpiExpenses' in dash_js, 'dashboard writes income/expense KPIs')
+    assert_('renderTrend' in dash_js and 'renderCategory' in dash_js and 'renderBudget' in dash_js, 'dashboard renders charts')
+    assert_('buildSearchIndex' in dash_js and 'FinSearch.mount' in dash_js, 'dashboard search indexes data')
+
+    # Python mirror of onboarding → dashboard KPI math
+    income = 5000
+    expenses = {'Food': 400, 'Rent': 1500, 'Transport': 200}
+    month_expense = sum(expenses.values())
+    balance = income - month_expense
+    savings = round(((income - month_expense) / income) * 100)
+    assert_(month_expense == 2100 and balance == 2900 and savings == 58,
+            'onboarding seed math: income 5000 → expense 2100 → balance 2900 → 58% savings')
+    assert_(all(round(a * 1.15) == expected for a, expected in ((400, 460), (1500, 1725), (200, 230))),
+            'onboarding budget seed uses 115% of category spend')
 
     # Currency + search wiring
     storage = (ROOT / 'js/storage.js').read_text()

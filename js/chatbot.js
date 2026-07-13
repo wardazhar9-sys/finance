@@ -62,8 +62,8 @@
       keywords: ['get started', 'how to start', 'begin', 'sign up', 'signup', 'create account', 'register', 'first time', 'new user', 'onboarding', 'how do i use', "i'm new", 'im new'],
       facts: [
         'Click Sign Up or Get Started to create a demo account (client-side only — not real secure auth).',
-        'Then finish the 5-step onboarding: monthly income, spending categories, typical spend per category, main savings goal + target, and your money style.',
-        'Those answers seed your Overview dashboard so charts feel personal from day one.',
+        'Then finish the 6-step onboarding: display currency, monthly income, spending categories, typical spend per category, main savings goal + target, and your money style.',
+        'Those answers seed your Overview dashboard so charts feel personal from day one — income, expenses, budgets, and your first goal appear immediately.',
         'Sign-up page: ' + path('signup.html'),
       ],
       cta: 'After you sign up, I can also walk you through what each dashboard page does.',
@@ -111,9 +111,10 @@
       title: 'Dashboard / Overview',
       keywords: ['dashboard', 'overview', 'kpi', 'charts', 'home screen', 'summary', 'activity'],
       facts: [
-        'Overview is your home base after login — KPIs, charts, goal/budget summaries, and recent activity.',
+        'Overview is your home base after login — KPIs (balance, income, expenses, savings rate), charts, goal/budget summaries, recent activity, and live search.',
+        'Monthly income from onboarding appears as a Salary income transaction so the Income KPI matches what you entered.',
         'Pro unlocks income vs expense trends and budget vs actual on Overview. Premium unlocks Subscriptions and Net Worth cards.',
-        'Tips adapt to the money style you chose during onboarding.',
+        'Tips adapt to the money style you chose during onboarding. Change currency from the sidebar anytime.',
         'Open it: ' + path('dashboard.html'),
       ],
       cta: 'Curious about transactions, budgets, or goals next?',
@@ -278,17 +279,45 @@
       id: 'onboarding-detail',
       pages: ['onboarding', 'signup'],
       title: 'Onboarding steps',
-      keywords: ['onboarding', 'wizard', 'questionnaire', 'five step', '5 step', 'income question', 'setup'],
+      keywords: ['onboarding', 'wizard', 'questionnaire', 'five step', '5 step', 'six step', '6 step', 'income question', 'setup', 'continue'],
       facts: [
-        'Step 1: monthly income (baseline for budgets and savings rate).',
-        'Step 2: top spending categories — Food, Rent, Transport, Shopping, Bills, Health, Entertainment, Other.',
-        'Step 3: typical monthly amount for each selected category.',
-        'Step 4: main goal + target amount (optional already-saved amount).',
-        'Step 5: money style — Planner, Saver, Spender, or Goal Chaser.',
-        'Those answers populate charts immediately after onboarding.',
+        'Step 1: choose your display currency (ISO codes with regional detection).',
+        'Step 2: monthly income (baseline for budgets and savings rate — Continue validates amount > 0).',
+        'Step 3: top spending categories — Food, Rent, Transport, Shopping, Bills, Health, Entertainment, Other.',
+        'Step 4: typical monthly amount for each selected category (seeds expense transactions + budgets).',
+        'Step 5: main goal + target amount (optional already-saved amount).',
+        'Step 6: money style — Planner, Saver, Spender, or Goal Chaser.',
+        'Use Continue to advance each step; Finish on step 6 launches Overview with seeded charts.',
       ],
       cta: 'I can also explain what each money style changes on the dashboard.',
       actions: [{ label: 'Sign Up to Start', href: path('signup.html') }],
+    },
+    {
+      id: 'currency',
+      pages: ['onboarding', 'dashboard', 'transactions', 'goals', 'budgets'],
+      title: 'Currency display',
+      keywords: ['currency', 'currencies', 'dollar', 'euro', 'pound', 'symbol', 'display currency', 'iso', 'gbp', 'eur', 'pkr', 'rupee', 'change currency'],
+      facts: [
+        'Pick a display currency during onboarding step 1, or anytime from the sidebar currency picker.',
+        'Amounts format with Intl.NumberFormat for your chosen ISO 4217 code (USD, EUR, GBP, PKR, and many more).',
+        'Changing currency refreshes KPIs, charts, and form amounts across Overview and other app pages.',
+        'Demo wallet and plan prices on Pricing stay in demo dollars ($25 starter, Pro $6, Premium $12).',
+      ],
+      cta: 'Want help finding the currency picker on Overview?',
+      actions: [{ label: 'Open Overview', href: path('dashboard.html') }],
+    },
+    {
+      id: 'search',
+      pages: ['dashboard'],
+      title: 'Dashboard search',
+      keywords: ['search', 'find', 'lookup', 'filter search', 'finsearch', 'search bar', 'search box'],
+      facts: [
+        'Overview includes a live search bar that indexes transactions, goals, budgets, subscriptions, and net-worth items.',
+        'Type part of a category, note, or name — results update as you type; pick one to jump to that page.',
+        'Search is available on Free and higher plans.',
+      ],
+      cta: 'I can also walk you through Transactions filters if you need narrower lists.',
+      actions: [{ label: 'Open Overview', href: path('dashboard.html') }],
     },
     {
       id: 'money-styles',
@@ -358,7 +387,7 @@
         'Data safety: stored locally; nothing leaves your device.',
         'Charges: no real card — upgrades use demo wallet credits ($25 starter, +$10 top-ups).',
         'Changing plans: buy Pro ($6) or Premium ($12) on the Pricing page; higher plans keep lower-tier features.',
-        'After signup: a 5-step questionnaire seeds your charts immediately.',
+        'After signup: a 6-step questionnaire (currency → income → categories → amounts → goal → style) seeds your charts immediately.',
       ],
       cta: 'Any of those FAQ points you want expanded?',
       actions: [{ label: 'Open Pricing FAQ', href: path('pricing.html') }],
@@ -702,7 +731,7 @@
         text:
           "Great — let's get you started the right way.\n\n" +
           '1) Sign Up for a free account\n' +
-          '2) Finish the 5-step onboarding\n' +
+          '2) Finish the 6-step onboarding\n' +
           '3) Land on Overview with your charts ready\n\n' +
           'Dashboard pages stay locked until you sign up, so that’s the best first step.',
         actions: [
@@ -1424,7 +1453,7 @@
       leadShown = true;
       saveMeta({ leadShown: true });
       addMessage(
-        `Saved locally for this demo. Here’s your quick checklist:\n\n1) Sign up\n2) Finish 5-step onboarding\n3) Review Overview charts\n4) Add a budget + goal\n5) Explore Reports\n\nNothing was emailed — FinTrack has no backend mailer.`,
+        `Saved locally for this demo. Here’s your quick checklist:\n\n1) Sign up\n2) Finish 6-step onboarding (currency, income, categories, amounts, goal, style)\n3) Review Overview charts + search\n4) Add a budget + goal\n5) Explore Reports\n\nNothing was emailed — FinTrack has no backend mailer.`,
         'bot',
         {
           actions: [
