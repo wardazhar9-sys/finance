@@ -118,8 +118,19 @@ function bindTransitionLinks(selector) {
   });
 }
 
+function loadFinTrackChatbot() {
+  if (window.__fintrackChatbotLoaded || document.querySelector('script[data-fintrack-chatbot]')) return;
+  const inPages = location.pathname.includes('/pages/');
+  const base = inPages ? '../' : '';
+  const script = document.createElement('script');
+  script.src = `${base}js/chatbot.js?v=6`;
+  script.dataset.fintrackChatbot = '1';
+  document.body.appendChild(script);
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   initSplash();
   initPageLoader();
   bindTransitionLinks('a, .logo, .auth-logo');
+  loadFinTrackChatbot();
 });
