@@ -530,6 +530,13 @@ def test_dashboard_form_validation():
     assert_('id="dashSearch"' in dash_html, 'dashboard has search mount')
     assert_('currency.js' in dash_html and 'search.js' in dash_html, 'dashboard loads currency + search')
     assert_('currencySelectMount' in (ROOT / 'js/app-nav.js').read_text(), 'sidebar currency mount')
+    app_nav = (ROOT / 'js/app-nav.js').read_text()
+    assert_('ensureMobileNavChrome' in app_nav and 'side-nav-toggle' in app_nav, 'app-nav mobile menu toggle')
+    assert_('side-footer' in app_nav, 'app-nav groups currency + logout in footer')
+    dash_css = (ROOT / 'css/dashboard.css').read_text()
+    assert_('sidebar.is-open' in dash_css and '@media (max-width: 900px)' in dash_css, 'dashboard drawer responsive CSS')
+    cur_css = (ROOT / 'css/currency.css').read_text()
+    assert_('.side-currency .currency-select-trigger' in cur_css, 'currency CSS sizes sidebar trigger')
 
     for page, form_id in [
         ('pages/transactions.html', 'txFormError'),

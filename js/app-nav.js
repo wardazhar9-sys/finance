@@ -1,6 +1,6 @@
 /* app-nav.js — shared sidebar for all authenticated app pages */
 
-const APP_NAV_VERSION = 15;
+const APP_NAV_VERSION = 16;
 
 const APP_NAV_LINKS = [
   { page: 'dashboard', href: 'dashboard.html', icon: 'fa-gauge-high', label: 'Overview' },
@@ -12,6 +12,70 @@ const APP_NAV_LINKS = [
   { page: 'reports', href: 'reports.html', icon: 'fa-file-lines', label: 'Reports' },
   { page: 'networth', href: 'networth.html', icon: 'fa-chart-pie', label: 'Net Worth' },
 ];
+
+function isMobileNavViewport() {
+  return window.matchMedia('(max-width: 900px)').matches;
+}
+
+function setSidebarOpen(open) {
+  const sidebar = document.getElementById('appSidebar');
+  const backdrop = document.getElementById('sideNavBackdrop');
+  const toggle = document.getElementById('sideNavToggle');
+  if (!sidebar) return;
+
+  sidebar.classList.toggle('is-open', open);
+  document.body.classList.toggle('sidebar-open', open);
+
+  if (backdrop) {
+    backdrop.hidden = !open;
+    backdrop.setAttribute('aria-hidden', open ? 'false' : 'true');
+  }
+  if (toggle) {
+    toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+    toggle.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
+    const icon = toggle.querySelector('i');
+    if (icon) icon.className = open ? 'fa-solid fa-xmark' : 'fa-solid fa-bars';
+  }
+}
+
+function closeSidebarNav() {
+  setSidebarOpen(false);
+}
+
+function toggleSidebarNav() {
+  const sidebar = document.getElementById('appSidebar');
+  if (!sidebar) return;
+  setSidebarOpen(!sidebar.classList.contains('is-open'));
+}
+
+function ensureMobileNavChrome() {
+  if (!document.getElementById('appSidebar')) return;
+
+  let backdrop = document.getElementById('sideNavBackdrop');
+  if (!backdrop) {
+    backdrop = document.createElement('div');
+    backdrop.id = 'sideNavBackdrop';
+    backdrop.className = 'side-nav-backdrop';
+    backdrop.hidden = true;
+    backdrop.setAttribute('aria-hidden', 'true');
+    backdrop.addEventListener('click', closeSidebarNav);
+    document.body.appendChild(backdrop);
+  }
+
+  let toggle = document.getElementById('sideNavToggle');
+  if (!toggle) {
+    toggle = document.createElement('button');
+    toggle.type = 'button';
+    toggle.id = 'sideNavToggle';
+    toggle.className = 'side-nav-toggle';
+    toggle.setAttribute('aria-controls', 'appSidebar');
+    toggle.setAttribute('aria-expanded', 'false');
+    toggle.setAttribute('aria-label', 'Open menu');
+    toggle.innerHTML = '<i class="fa-solid fa-bars" aria-hidden="true"></i>';
+    toggle.addEventListener('click', toggleSidebarNav);
+    document.body.appendChild(toggle);
+  }
+}
 
 function renderAppNav(activePage) {
   const el = document.getElementById('appSidebar');
@@ -41,9 +105,14 @@ function renderAppNav(activePage) {
   }).join('');
 
   el.innerHTML = `
-    <div class="logo" onclick="location.href='../index.html'">
-      <div class="logo-icon"><i class="fa-solid fa-chart-line"></i></div>
-      <div class="logo-text">Fin<span>Track</span></div>
+    <div class="side-brand">
+      <div class="logo" onclick="location.href='../index.html'">
+        <div class="logo-icon"><i class="fa-solid fa-chart-line"></i></div>
+        <div class="logo-text">Fin<span>Track</span></div>
+      </div>
+      <button type="button" class="side-drawer-close" aria-label="Close menu" onclick="closeSidebarNav()">
+        <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+      </button>
     </div>
     <div class="side-plan">
       <div class="side-plan-row">
@@ -56,11 +125,13 @@ function renderAppNav(activePage) {
       </div>
     </div>
     <nav class="side-nav">${links}</nav>
-    <div class="side-currency">
-      <div class="side-currency-label"><i class="fa-solid fa-coins"></i> Currency</div>
-      <div id="currencySelectMount"></div>
-    </div>
-    <button class="side-logout" onclick="logout()"><i class="fa-solid fa-arrow-right-from-bracket"></i> Log Out</button>`;
+    <div class="side-footer">
+      <div class="side-currency">
+        <div class="side-currency-label"><i class="fa-solid fa-coins"></i> Currency</div>
+        <div id="currencySelectMount"></div>
+      </div>
+      <button class="side-logout" onclick="logout()"><i class="fa-solid fa-arrow-right-from-bracket"></i> Log Out</button>
+    </div>`;
 
   if (typeof mountSidebarCurrencySelect === 'function') {
     const mount = document.getElementById('currencySelectMount');
@@ -69,6 +140,12 @@ function renderAppNav(activePage) {
       mountSidebarCurrencySelect();
     }
   }
+
+  el.querySelectorAll('.side-nav a').forEach((a) => {
+    a.addEventListener('click', () => {
+      if (isMobileNavViewport()) closeSidebarNav();
+    });
+  });
 }
 
 function topUpDemoWallet() {
@@ -96,7 +173,9 @@ function initAppNav() {
   if (el.dataset.navInit === '1' && el.dataset.navVersion === version) return;
   el.dataset.navInit = '1';
   el.dataset.navVersion = version;
+  el.setAttribute('aria-label', 'App navigation');
   renderAppNav(el.dataset.page || '');
+  ensureMobileNavChrome();
   if (typeof bindTransitionLinks === 'function') {
     bindTransitionLinks('.side-nav a, .sidebar .logo');
   }
@@ -104,6 +183,16 @@ function initAppNav() {
 }
 
 window.topUpDemoWallet = topUpDemoWallet;
+window.closeSidebarNav = closeSidebarNav;
+window.toggleSidebarNav = toggleSidebarNav;
+
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') closeSidebarNav();
+});
+
+window.addEventListener('resize', () => {
+  if (!isMobileNavViewport()) closeSidebarNav();
+});
 
 // Scripts load at end of body — sidebar exists; render immediately (not only on DOMContentLoaded)
 initAppNav();

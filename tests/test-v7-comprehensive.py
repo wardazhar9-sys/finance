@@ -250,6 +250,7 @@ def test_source_gates():
     subs = read("js/subscriptions.js")
     dash = read("js/dashboard.js")
     nav = read("js/app-nav.js")
+    dash_css = read("css/dashboard.css")
     pricing = read("pages/pricing.html")
     chatbot = read("js/chatbot.js")
 
@@ -271,6 +272,10 @@ def test_source_gates():
     ok("data-plan=\"premium\"" in nav or "is-premium" in nav, "sidebar Premium tags")
     ok("is-pro" in nav and "Subscriptions" in nav, "sidebar Pro tags + Subscriptions label")
     ok("currencySelectMount" in nav and "mountSidebarCurrencySelect" in nav, "sidebar currency picker")
+    ok("ensureMobileNavChrome" in nav and "side-nav-toggle" in nav, "sidebar mobile drawer chrome")
+    ok("side-footer" in nav and "side-brand" in nav, "sidebar brand/footer layout")
+    ok("side-nav-toggle" in dash_css and "sidebar.is-open" in dash_css, "drawer open styles")
+    ok("@media (max-width: 900px)" in dash_css, "tablet/mobile sidebar breakpoint")
 
     ok("currency: ''" in storage or "profile.currency" in storage, "storage profile.currency")
     ok("getUserCurrency" in read("js/storage.js") or "formatMoney" in read("js/currency-data.js"), "currency helpers present")

@@ -167,9 +167,9 @@
 
 /* Sidebar placement */
 .side-currency {
-  margin-top: auto;
-  padding-top: 16px;
-  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  margin-top: 0;
+  padding: 0;
+  border-top: none;
   flex-shrink: 0;
 }
 
@@ -188,6 +188,34 @@
 .side-currency-label i {
   color: var(--gold);
   font-size: 12px;
+}
+
+.side-currency .currency-select {
+  width: 100%;
+}
+
+.side-currency .currency-select-trigger {
+  padding: 9px 11px;
+  min-height: 40px;
+  border-radius: 11px;
+  font-size: 12.5px;
+  gap: 8px;
+}
+
+.side-currency .currency-select--compact .currency-select-text {
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.side-currency .currency-select-panel {
+  bottom: calc(100% + 8px);
+  top: auto;
+  max-height: min(280px, 42vh);
+  z-index: 1400;
+}
+
+.side-currency .currency-flag {
+  font-size: 16px;
 }
 
 /* Onboarding — panel opens downward */
@@ -220,4 +248,37 @@
   font-weight: 500;
 }
 
-/* Currency selector stays available inside the mobile sidebar drawer. */
+/* Mobile / tablet drawer — balanced currency block */
+@media (max-width: 900px) {
+  .side-currency {
+    width: 100%;
+  }
+
+  .side-currency .currency-select-trigger {
+    min-height: 44px;
+    padding: 11px 12px;
+    font-size: 13px;
+  }
+
+  .side-currency .currency-select-panel {
+    max-height: min(260px, 38vh);
+    left: 0;
+    right: 0;
+    width: 100%;
+  }
+
+  .side-currency .currency-select-option {
+    min-height: 42px;
+    padding: 11px 12px;
+  }
+}
+
+@media (max-width: 420px) {
+  .side-currency-label {
+    margin-bottom: 7px;
+  }
+
+  .side-currency .currency-select-trigger {
+    min-height: 42px;
+  }
+}
