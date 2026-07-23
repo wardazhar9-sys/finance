@@ -1,6 +1,6 @@
 /* app-nav.js — shared sidebar for all authenticated app pages */
 
-const APP_NAV_VERSION = 15;
+const APP_NAV_VERSION = 16;
 
 const APP_NAV_LINKS = [
   { page: 'dashboard', href: 'dashboard.html', icon: 'fa-gauge-high', label: 'Overview' },
@@ -12,6 +12,87 @@ const APP_NAV_LINKS = [
   { page: 'reports', href: 'reports.html', icon: 'fa-file-lines', label: 'Reports' },
   { page: 'networth', href: 'networth.html', icon: 'fa-chart-pie', label: 'Net Worth' },
 ];
+
+function closeAppSidebar() {
+  const app = document.querySelector('.app');
+  const toggle = document.getElementById('sidebarToggle');
+  if (!app) return;
+  app.classList.remove('sidebar-open');
+  document.body.classList.remove('sidebar-lock');
+  if (toggle) {
+    toggle.setAttribute('aria-expanded', 'false');
+    toggle.setAttribute('aria-label', 'Open menu');
+  }
+}
+
+function openAppSidebar() {
+  const app = document.querySelector('.app');
+  const toggle = document.getElementById('sidebarToggle');
+  if (!app) return;
+  app.classList.add('sidebar-open');
+  document.body.classList.add('sidebar-lock');
+  if (toggle) {
+    toggle.setAttribute('aria-expanded', 'true');
+    toggle.setAttribute('aria-label', 'Close menu');
+  }
+}
+
+function toggleAppSidebar() {
+  const app = document.querySelector('.app');
+  if (!app) return;
+  if (app.classList.contains('sidebar-open')) closeAppSidebar();
+  else openAppSidebar();
+}
+
+function ensureAppSidebarChrome() {
+  const app = document.querySelector('.app');
+  const topbar = document.querySelector('.topbar');
+  if (!app || !topbar) return;
+
+  if (!document.getElementById('sidebarBackdrop')) {
+    const backdrop = document.createElement('button');
+    backdrop.type = 'button';
+    backdrop.id = 'sidebarBackdrop';
+    backdrop.className = 'sidebar-backdrop';
+    backdrop.setAttribute('aria-label', 'Close menu');
+    backdrop.addEventListener('click', closeAppSidebar);
+    app.appendChild(backdrop);
+  }
+
+  if (!document.getElementById('sidebarToggle')) {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.id = 'sidebarToggle';
+    btn.className = 'sidebar-toggle';
+    btn.setAttribute('aria-label', 'Open menu');
+    btn.setAttribute('aria-expanded', 'false');
+    btn.setAttribute('aria-controls', 'appSidebar');
+    btn.innerHTML = '<i class="fa-solid fa-bars" aria-hidden="true"></i>';
+    btn.addEventListener('click', toggleAppSidebar);
+
+    const greeting = topbar.querySelector('.greeting');
+    if (greeting) {
+      const wrap = document.createElement('div');
+      wrap.className = 'topbar-lead';
+      wrap.style.cssText = 'display:flex;align-items:flex-start;gap:12px;min-width:0;flex:1 1 220px;';
+      topbar.insertBefore(wrap, greeting);
+      wrap.appendChild(btn);
+      wrap.appendChild(greeting);
+    } else {
+      topbar.prepend(btn);
+    }
+  }
+
+  if (!ensureAppSidebarChrome._bound) {
+    ensureAppSidebarChrome._bound = true;
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape') closeAppSidebar();
+    });
+    window.addEventListener('resize', () => {
+      if (window.innerWidth > 820) closeAppSidebar();
+    });
+  }
+}
 
 function renderAppNav(activePage) {
   const el = document.getElementById('appSidebar');
@@ -62,6 +143,10 @@ function renderAppNav(activePage) {
     </div>
     <button class="side-logout" onclick="logout()"><i class="fa-solid fa-arrow-right-from-bracket"></i> Log Out</button>`;
 
+  el.querySelectorAll('.side-nav a').forEach((link) => {
+    link.addEventListener('click', () => closeAppSidebar());
+  });
+
   if (typeof mountSidebarCurrencySelect === 'function') {
     const mount = document.getElementById('currencySelectMount');
     if (mount) {
@@ -97,6 +182,7 @@ function initAppNav() {
   el.dataset.navInit = '1';
   el.dataset.navVersion = version;
   renderAppNav(el.dataset.page || '');
+  ensureAppSidebarChrome();
   if (typeof bindTransitionLinks === 'function') {
     bindTransitionLinks('.side-nav a, .sidebar .logo');
   }
@@ -104,6 +190,8 @@ function initAppNav() {
 }
 
 window.topUpDemoWallet = topUpDemoWallet;
+window.closeAppSidebar = closeAppSidebar;
+window.toggleAppSidebar = toggleAppSidebar;
 
 // Scripts load at end of body — sidebar exists; render immediately (not only on DOMContentLoaded)
 initAppNav();
